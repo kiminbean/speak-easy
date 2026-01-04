@@ -1,6 +1,0 @@
-{
-  "CFBundleDisplayName": "SpeakEasy",
-  "CFBundleName": "SpeakEasy",
-  "NSLocationWhenInUseUsageDescription": "O SpeakEasy usa sua localização para sugerir frases apropriadas ao contexto.",
-  "NSMicrophoneUsageDescription": "O SpeakEasy usa o microfone para recursos de entrada de voz."
-}

@@ -1,6 +1,0 @@
-{
-  "CFBundleDisplayName": "SpeakEasy",
-  "CFBundleName": "SpeakEasy",
-  "NSLocationWhenInUseUsageDescription": "SpeakEasy使用您的位置来建议适合场景的短语。",
-  "NSMicrophoneUsageDescription": "SpeakEasy使用麦克风进行语音输入。"
-}

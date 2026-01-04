@@ -44,7 +44,7 @@
         "android.permission.VIBRATE",
         "android.permission.RECEIVE_BOOT_COMPLETED"
       ],
-      "versionCode": 16
+      "versionCode": 17
     },
     "web": {
       "bundler": "metro",
@@ -70,18 +70,6 @@
     ],
     "experiments": {
       "typedRoutes": true
-    },
-    "locales": {
-      "ko": "./locales/ko.json",
-      "ja": "./locales/ja.json",
-      "zh": "./locales/zh.json",
-      "ar": "./locales/ar.json",
-      "es": "./locales/es.json",
-      "fr": "./locales/fr.json",
-      "de": "./locales/de.json",
-      "pt": "./locales/pt.json",
-      "ru": "./locales/ru.json",
-      "hi": "./locales/hi.json"
     },
     "extra": {
       "eas": {
