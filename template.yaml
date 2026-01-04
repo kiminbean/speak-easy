@@ -1,0 +1,240 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  SpeakEasy - AI-Powered AAC System
+  AWS 10,000 AIdeas Competition | Social Good Track
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: python3.11
+    MemorySize: 256
+    Environment:
+      Variables:
+        STAGE: !Ref Stage
+        LOG_LEVEL: INFO
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, staging, prod]
+
+Resources:
+  # ============================================
+  # API Gateway
+  # ============================================
+  SpeakEasyApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub speakeasy-api-${Stage}
+      StageName: !Ref Stage
+      Cors:
+        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
+      Auth:
+        DefaultAuthorizer: NONE  # Simplified for demo
+      EndpointConfiguration: REGIONAL
+
+  # ============================================
+  # Lambda Functions
+  # ============================================
+  
+  # Prediction Function
+  PredictionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub speakeasy-prediction-${Stage}
+      Handler: prediction_handler.lambda_handler
+      CodeUri: ../backend/lambda/
+      Description: AI-powered phrase prediction
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:Query
+              Resource: !GetAtt UsersTable.Arn
+      Events:
+        Predict:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SpeakEasyApi
+            Path: /predict
+            Method: POST
+
+  # User Management Function
+  UserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub speakeasy-user-${Stage}
+      Handler: user_handler.lambda_handler
+      CodeUri: ../backend/lambda/
+      Description: User profile management
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+      Events:
+        GetUser:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SpeakEasyApi
+            Path: /users/{userId}
+            Method: GET
+        UpdateUser:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SpeakEasyApi
+            Path: /users/{userId}
+            Method: PUT
+
+  # Speech Synthesis Function
+  SpeechFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub speakeasy-speech-${Stage}
+      Handler: speech_handler.lambda_handler
+      CodeUri: ../backend/lambda/
+      Description: Text-to-speech synthesis
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - polly:SynthesizeSpeech
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - s3:PutObject
+              Resource: !Sub ${AudioBucket.Arn}/*
+      Events:
+        Speak:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SpeakEasyApi
+            Path: /speak
+            Method: POST
+
+  # ============================================
+  # DynamoDB Tables
+  # ============================================
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub speakeasy-users-${Stage}
+      BillingMode: PAY_PER_REQUEST  # Free Tier optimized
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  ConversationsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub speakeasy-conversations-${Stage}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: conversationId
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: conversationId
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  # ============================================
+  # S3 Buckets
+  # ============================================
+  AudioBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub speakeasy-audio-${Stage}-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldAudio
+            Status: Enabled
+            ExpirationInDays: 7  # Free Tier optimization
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins: ['*']
+            AllowedMethods: [GET]
+            AllowedHeaders: ['*']
+
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub speakeasy-frontend-${Stage}-${AWS::AccountId}
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub ${FrontendBucket.Arn}/*
+
+  # ============================================
+  # SNS Topics (Notifications)
+  # ============================================
+  CaregiverAlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub speakeasy-caregiver-alerts-${Stage}
+      DisplayName: SpeakEasy Caregiver Alerts
+
+# ============================================
+# Outputs
+# ============================================
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub https://${SpeakEasyApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}
+    Export:
+      Name: !Sub ${AWS::StackName}-ApiEndpoint
+
+  FrontendUrl:
+    Description: Frontend website URL
+    Value: !GetAtt FrontendBucket.WebsiteURL
+    Export:
+      Name: !Sub ${AWS::StackName}-FrontendUrl
+
+  AudioBucketName:
+    Description: S3 bucket for audio files
+    Value: !Ref AudioBucket
+
+  UsersTableName:
+    Description: DynamoDB users table name
+    Value: !Ref UsersTable

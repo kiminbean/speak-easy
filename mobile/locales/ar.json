@@ -1,0 +1,6 @@
+{
+  "CFBundleDisplayName": "SpeakEasy",
+  "CFBundleName": "SpeakEasy",
+  "NSLocationWhenInUseUsageDescription": "يستخدم SpeakEasy موقعك لاقتراح عبارات مناسبة للسياق.",
+  "NSMicrophoneUsageDescription": "يستخدم SpeakEasy الميكروفون لميزات الإدخال الصوتي."
+}
