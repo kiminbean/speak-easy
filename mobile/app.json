@@ -7,7 +7,7 @@
     "icon": "./assets/icon.png",
     "scheme": "speakeasy",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -44,7 +44,7 @@
         "android.permission.VIBRATE",
         "android.permission.RECEIVE_BOOT_COMPLETED"
       ],
-      "versionCode": 2
+      "versionCode": 16
     },
     "web": {
       "bundler": "metro",
