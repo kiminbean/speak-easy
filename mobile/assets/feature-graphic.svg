@@ -1,0 +1,29 @@
+<svg width="1024" height="500" viewBox="0 0 1024 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90D9"/>
+      <stop offset="100%" style="stop-color:#2E5C8A"/>
+    </linearGradient>
+  </defs>
+  
+  <rect width="1024" height="500" fill="url(#bgGrad)"/>
+  
+  <path d="M180 120C180 93.5 201.5 72 228 72H348C374.5 72 396 93.5 396 120V200C396 226.5 374.5 248 348 248H308L268 300L288 248H228C201.5 248 180 226.5 180 200V120Z" fill="white" fill-opacity="0.95"/>
+  <circle cx="258" cy="160" r="18" fill="#4A90D9"/>
+  <circle cx="308" cy="160" r="18" fill="#4A90D9"/>
+  <circle cx="358" cy="160" r="18" fill="#4A90D9"/>
+  
+  <circle cx="288" cy="380" r="45" fill="#FF6B6B"/>
+  <path d="M288 355L298 375H278L288 355Z" fill="white"/>
+  <circle cx="288" cy="395" r="8" fill="white"/>
+  
+  <text x="520" y="180" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="white">SpeakEasy</text>
+  
+  <text x="520" y="250" font-family="Arial, sans-serif" font-size="28" fill="white" fill-opacity="0.95">AI 의사소통 앱</text>
+  
+  <text x="520" y="320" font-family="Arial, sans-serif" font-size="22" fill="white" fill-opacity="0.85">✓ 100% 오프라인</text>
+  <text x="520" y="355" font-family="Arial, sans-serif" font-size="22" fill="white" fill-opacity="0.85">✓ 20개 언어 지원</text>
+  <text x="520" y="390" font-family="Arial, sans-serif" font-size="22" fill="white" fill-opacity="0.85">✓ 완전 무료</text>
+  
+  <text x="520" y="450" font-family="Arial, sans-serif" font-size="18" fill="white" fill-opacity="0.7">비언어 장애인을 위한 목소리</text>
+</svg>

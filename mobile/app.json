@@ -44,7 +44,7 @@
         "android.permission.VIBRATE",
         "android.permission.RECEIVE_BOOT_COMPLETED"
       ],
-      "versionCode": 17
+      "versionCode": 18
     },
     "web": {
       "bundler": "metro",
