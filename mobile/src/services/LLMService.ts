@@ -1,25 +1,44 @@
-/**
- * On-device LLM Service with SmolLM2-360M
- * 
- * Uses react-native-executorch (SmolLM2-360M-Quantized) for faster on-device inference.
- * Falls back to rule-based predictions in Expo Go where native modules are unavailable.
- */
-
 import { UserContext, Phrase, PhraseCategory, SupportedLanguage } from '../types';
 import { createHash } from '../utils/hash';
 import { getLocationPhrasesForLanguage } from '../i18n/phrases';
 import { useSettingsStore } from '../stores/settingsStore';
 
-let LLMModule: any = null;
-let SMOLLM2_360M_QUANTIZED: any = null;
+interface Message {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
+interface LLMGenerationConfig {
+  temperature?: number;
+  topp?: number;
+}
+
+interface LLMModuleConfig {
+  generationConfig: LLMGenerationConfig;
+}
+
+interface LLMModuleInstance {
+  load: (model: string, onProgress: (progress: number) => void) => Promise<void>;
+  generate: (messages: Message[]) => Promise<string>;
+  configure: (config: LLMModuleConfig) => void;
+  delete: () => void;
+  getGeneratedTokenCount?: () => number;
+}
+
+interface LLMModuleConstructor {
+  new (config: { tokenCallback: (token: string) => void }): LLMModuleInstance;
+}
+
+let LLMModuleClass: LLMModuleConstructor | null = null;
+let SMOLLM2_360M_QUANTIZED: string | null = null;
 
 try {
   const executorch = require('react-native-executorch');
   if (__DEV__) console.log('[LLM] react-native-executorch loaded');
-  LLMModule = executorch.LLMModule;
+  LLMModuleClass = executorch.LLMModule;
   SMOLLM2_360M_QUANTIZED = executorch.SMOLLM2_1_360M_QUANTIZED;
   if (__DEV__) console.log('[LLM] SmolLM2-360M-Quantized:', SMOLLM2_360M_QUANTIZED ? 'Found' : 'Not found');
-} catch (error) {
+} catch {
   if (__DEV__) console.log('[LLM] react-native-executorch not available (Expo Go mode)');
 }
 
@@ -33,11 +52,6 @@ export interface LLMResponse {
   text: string;
   tokensPerSecond?: number;
   totalTimeMs?: number;
-}
-
-interface Message {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
 }
 
 const DEFAULT_CONFIG: LLMConfig = {
@@ -62,7 +76,7 @@ class LLMServiceClass {
   private isInitialized = false;
   private isModelLoaded = false;
   private downloadProgress = 0;
-  private llmModule: any = null;
+  private llmModule: LLMModuleInstance | null = null;
   private useNativeModule = false;
   private currentResponse = '';
   private onProgressCallback?: (progress: number) => void;
@@ -88,7 +102,7 @@ class LLMServiceClass {
 
     if (__DEV__) console.log(`[LLM] Initializing: ${this.config.modelName}`);
 
-    if (LLMModule && SMOLLM2_360M_QUANTIZED) {
+    if (LLMModuleClass && SMOLLM2_360M_QUANTIZED) {
       try {
         if (__DEV__) console.log('[LLM] Loading SmolLM2-360M...');
         await this.initializeNativeModule();
@@ -104,7 +118,11 @@ class LLMServiceClass {
   }
 
   private async initializeNativeModule(): Promise<void> {
-    this.llmModule = new LLMModule({
+    if (!LLMModuleClass || !SMOLLM2_360M_QUANTIZED) {
+      throw new Error('LLM module not available');
+    }
+
+    this.llmModule = new LLMModuleClass({
       tokenCallback: (token: string) => {
         this.currentResponse += token;
       },
@@ -173,8 +191,8 @@ class LLMServiceClass {
         response = await this.llmModule.generate(messages);
         
         if (__DEV__) console.log('[LLM] Response:', response?.length || 0, 'chars');
-      } catch (error: any) {
-        if (__DEV__) console.warn('[LLM] Gen error:', error?.message);
+      } catch (error) {
+        if (__DEV__) console.warn('[LLM] Gen error:', error instanceof Error ? error.message : 'Unknown error');
         response = await this.generateSimulatedResponse(prompt);
       }
     } else {
@@ -198,7 +216,7 @@ class LLMServiceClass {
 
     try {
       return this.parsePhrasesFromResponse(response.text, numPredictions);
-    } catch (error) {
+    } catch {
       if (__DEV__) console.warn('[LLM] Parse failed, using fallback');
       return this.getFallbackPhrases(context, numPredictions);
     }
@@ -259,7 +277,7 @@ class LLMServiceClass {
   private tryExtractLines(response: string, limit: number): Phrase[] | null {
     const lines = response
       .split(/[\n,]/)
-      .map(line => line.replace(/^\d+[\.\)]\s*/, '').trim())
+      .map(line => line.replace(/^\d+[.)]\s*/, '').trim())
       .filter(line => line.length > 2 && line.length < 100 && !line.startsWith('{'));
 
     if (lines.length === 0) return null;

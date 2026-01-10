@@ -7,13 +7,8 @@
 
 import { Phrase, UserContext, PredictionResult, EmotionType, SupportedLanguage } from '../types';
 import {
-  FALLBACK_PHRASES,
   EMOTION_PHRASES,
-  EMERGENCY_PHRASES,
-  QUICK_RESPONSES,
 } from '../constants';
-import { ContextService } from './ContextService';
-import { StorageService } from './StorageService';
 import { createHash } from '../utils/hash';
 import {
   getQuickResponsesForLanguage,
@@ -101,7 +96,7 @@ class PredictionServiceClass {
         ...result,
         latencyMs: Date.now() - startTime,
       };
-    } catch (error) {
+    } catch {
       if (__DEV__) console.log('[Prediction] LLM enhancement failed');
       return null;
     }
@@ -115,20 +110,21 @@ class PredictionServiceClass {
     const confidence: number[] = [];
     const language = context.language || 'en';
 
-    if (context.weather) {
+    const weather = context.weather;
+    if (weather) {
       const weatherPhrases = getWeatherPhrasesForLanguage(language, {
-        condition: context.weather.condition,
-        isRaining: context.weather.isRaining,
-        isSnowing: context.weather.isSnowing,
-        temperature: context.weather.temperature,
-        windSpeed: context.weather.windSpeed,
+        condition: weather.condition,
+        isRaining: weather.isRaining,
+        isSnowing: weather.isSnowing,
+        temperature: weather.temperature,
+        windSpeed: weather.windSpeed,
       });
       
       const weatherPhraseObjects: Phrase[] = weatherPhrases.slice(0, 2).map((text, index) => ({
-        id: `weather_${context.weather!.condition}_${Date.now()}_${index}`,
+        id: `weather_${weather.condition}_${Date.now()}_${index}`,
         text,
         category: 'need' as const,
-        emoji: this.getWeatherEmoji(context.weather!),
+        emoji: this.getWeatherEmoji(weather),
       }));
       
       for (const phrase of weatherPhraseObjects) {
@@ -161,13 +157,14 @@ class PredictionServiceClass {
       }
     }
 
-    if (context.emotionState) {
-      const emotionPhraseTexts = getCopingPhrasesForLanguage(language, context.emotionState).slice(0, 2);
+    const emotionState = context.emotionState;
+    if (emotionState) {
+      const emotionPhraseTexts = getCopingPhrasesForLanguage(language, emotionState).slice(0, 2);
       const emotionPhrases: Phrase[] = emotionPhraseTexts.map((text, index) => ({
-        id: `${context.locationType}_emotion_${context.emotionState}_${Date.now()}_${index}`,
+        id: `${context.locationType}_emotion_${emotionState}_${Date.now()}_${index}`,
         text,
         category: 'feeling' as const,
-        emoji: this.getEmojiForEmotion(context.emotionState!),
+        emoji: this.getEmojiForEmotion(emotionState),
       }));
       
       for (const phrase of emotionPhrases) {

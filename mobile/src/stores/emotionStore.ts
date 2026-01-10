@@ -4,9 +4,8 @@
  */
 
 import { create } from 'zustand';
-import { EmotionType, EmotionState, EmotionIntensity, SupportedLanguage } from '../types';
+import { EmotionType, EmotionState, SupportedLanguage } from '../types';
 import { EmotionService, NotificationService } from '../services';
-import { EMOTIONS } from '../constants';
 import { useSettingsStore } from './settingsStore';
 
 interface EmotionStoreState {

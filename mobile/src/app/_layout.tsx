@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text, StyleSheet, I18nManager } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
@@ -14,10 +14,12 @@ import {
   NotificationService,
   PredictionService,
   LLMService,
+  EmotionService,
 } from '../services';
 import { useSettingsStore, usePredictionStore } from '../stores';
 import { COLORS } from '../constants';
-import { configureRTLRequiresRestart, isRTLLanguage } from '../utils/rtl';
+import { ErrorBoundary } from '../components';
+import { configureRTLRequiresRestart } from '../utils/rtl';
 import { getTranslations } from '../i18n';
 
 export default function RootLayout() {
@@ -27,7 +29,7 @@ export default function RootLayout() {
   const { loadPredictions } = usePredictionStore();
   const [isInitializing, setIsInitializing] = useState(true);
   const [initStatus, setInitStatus] = useState('Starting...');
-  const [shouldShowOnboarding, setShouldShowOnboarding] = useState(false);
+  const [_shouldShowOnboarding, setShouldShowOnboarding] = useState(false);
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -40,6 +42,9 @@ export default function RootLayout() {
 
         setInitStatus('Initializing voice...');
         await TTSService.initialize();
+
+        setInitStatus('Restoring emotional context...');
+        await EmotionService.initialize();
 
         setInitStatus('Setting up notifications...');
         await NotificationService.initialize();
@@ -112,10 +117,11 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <SafeAreaProvider>
-        <StatusBar style="dark" />
-        <Stack
+    <ErrorBoundary>
+      <GestureHandlerRootView style={styles.container}>
+        <SafeAreaProvider>
+          <StatusBar style="dark" />
+          <Stack
           screenOptions={{
             headerStyle: {
               backgroundColor: COLORS.primary,
@@ -178,9 +184,10 @@ export default function RootLayout() {
               gestureEnabled: false,
             }}
           />
-        </Stack>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+          </Stack>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }
 

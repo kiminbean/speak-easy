@@ -63,11 +63,20 @@ export const usePredictionStore = create<PredictionState>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const [favorites, recentPhrases, customPhrases] = await Promise.all([
+      const [favorites, recentPhrases, customPhrases, savedLocation] = await Promise.all([
         StorageService.getFavorites(),
         StorageService.getRecentPhrases(10),
         StorageService.getCustomPhrases(),
+        StorageService.getCurrentLocation(),
       ]);
+
+      if (savedLocation && get().currentLocation === 'unknown') {
+        set({
+          currentLocation: savedLocation.location,
+          isLocationAutoDetected: savedLocation.isAutoDetected,
+        });
+        ContextService.setLocationType(savedLocation.location);
+      }
 
       if (requestId !== currentPredictionRequest) return;
 
@@ -145,11 +154,12 @@ export const usePredictionStore = create<PredictionState>((set, get) => ({
       isLocationAutoDetected: isAutoDetected,
     });
     
+    StorageService.saveCurrentLocation(location, isAutoDetected);
+    
     if (pendingLocationUpdate) {
       clearTimeout(pendingLocationUpdate);
     }
     
-    // Debounce 50ms for rapid location changes
     pendingLocationUpdate = setTimeout(() => {
       pendingLocationUpdate = null;
       get().refreshPredictions();

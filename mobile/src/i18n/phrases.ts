@@ -538,7 +538,7 @@ export const LOCATION_PHRASE_TRANSLATIONS: Record<SupportedLanguage, LocationPhr
 };
 
 type SeasonType = 'spring' | 'summer' | 'fall' | 'winter';
-type DayType = 'weekday' | 'weekend';
+type _DayType = 'weekday' | 'weekend';
 
 export const SEASONAL_PHRASES: Record<SupportedLanguage, Record<SeasonType, Record<string, string[]>>> = {
   en: {

@@ -8,7 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { usePredictionStore, useSettingsStore } from '../stores';
+import { useSettingsStore } from '../stores';
 import { StorageService, TTSService } from '../services';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants';
 import { getTranslations } from '../i18n';

@@ -12,15 +12,31 @@ import {
 } from '../types';
 import { EMOTIONS, PHRASE_SENTIMENT_MAP, ALERT_EMOTIONS } from '../constants';
 import { getCopingPhrasesForLanguage } from '../i18n/phrases';
+import { StorageService } from './StorageService';
 
 class EmotionServiceClass {
   private tapHistory: TapSignal[] = [];
   private phraseHistory: { timestamp: number; phrase: string }[] = [];
   private explicitEmotion: EmotionType | null = null;
+  private isInitialized = false;
 
-  // Time windows for signal analysis (in ms)
-  private readonly TAP_HISTORY_WINDOW = 5 * 60 * 1000; // 5 minutes
-  private readonly PHRASE_HISTORY_WINDOW = 10 * 60 * 1000; // 10 minutes
+  private readonly TAP_HISTORY_WINDOW = 5 * 60 * 1000;
+  private readonly PHRASE_HISTORY_WINDOW = 10 * 60 * 1000;
+
+  async initialize(): Promise<void> {
+    if (this.isInitialized) return;
+    
+    const [tapHistory, phraseHistory, explicitEmotion] = await Promise.all([
+      StorageService.getTapHistory(),
+      StorageService.getPhraseSentimentHistory(),
+      StorageService.getExplicitEmotion(),
+    ]);
+    
+    this.tapHistory = tapHistory;
+    this.phraseHistory = phraseHistory;
+    this.explicitEmotion = explicitEmotion;
+    this.isInitialized = true;
+  }
 
   /**
    * Record a tap interaction for pattern analysis
@@ -35,6 +51,7 @@ class EmotionServiceClass {
 
     this.tapHistory.push(signal);
     this.cleanupHistory();
+    StorageService.saveTapHistory(this.tapHistory);
   }
 
   /**
@@ -46,6 +63,7 @@ class EmotionServiceClass {
       phrase: phrase.toLowerCase(),
     });
     this.cleanupHistory();
+    StorageService.savePhrasesSentimentHistory(this.phraseHistory);
   }
 
   /**
@@ -53,6 +71,7 @@ class EmotionServiceClass {
    */
   setExplicitEmotion(emotion: EmotionType): void {
     this.explicitEmotion = emotion;
+    StorageService.saveExplicitEmotion(emotion);
   }
 
   /**
@@ -60,6 +79,7 @@ class EmotionServiceClass {
    */
   clearExplicitEmotion(): void {
     this.explicitEmotion = null;
+    StorageService.saveExplicitEmotion(null);
   }
 
   /**
@@ -118,32 +138,30 @@ class EmotionServiceClass {
     }
 
     const recentPhrases = this.phraseHistory.slice(-5);
-    const emotionMatches: Record<EmotionType, number> = {} as Record<EmotionType, number>;
+    const emotionMatches = new Map<EmotionType, number>();
 
-    // Initialize counts
-    for (const emotion of Object.keys(PHRASE_SENTIMENT_MAP) as EmotionType[]) {
-      emotionMatches[emotion] = 0;
+    for (const emotion of Object.keys(PHRASE_SENTIMENT_MAP)) {
+      emotionMatches.set(emotion as EmotionType, 0);
     }
 
-    // Count keyword matches
     for (const { phrase } of recentPhrases) {
       for (const [emotion, keywords] of Object.entries(PHRASE_SENTIMENT_MAP)) {
         for (const keyword of keywords) {
           if (phrase.includes(keyword)) {
-            emotionMatches[emotion as EmotionType]++;
+            const currentCount = emotionMatches.get(emotion as EmotionType) ?? 0;
+            emotionMatches.set(emotion as EmotionType, currentCount + 1);
           }
         }
       }
     }
 
-    // Find emotion with highest match count
     let maxEmotion: EmotionType = 'unknown';
     let maxCount = 0;
 
-    for (const [emotion, count] of Object.entries(emotionMatches)) {
+    for (const [emotion, count] of emotionMatches.entries()) {
       if (count > maxCount) {
         maxCount = count;
-        maxEmotion = emotion as EmotionType;
+        maxEmotion = emotion;
       }
     }
 
@@ -171,31 +189,30 @@ class EmotionServiceClass {
    * Detect current emotion using all available signals
    */
   detectEmotion(): EmotionState {
-    const emotionScores: Record<EmotionType, number> = {} as Record<EmotionType, number>;
+    const emotionScores = new Map<EmotionType, number>();
     const signalsUsed: string[] = [];
 
-    // Initialize scores
-    for (const emotion of Object.keys(EMOTIONS) as EmotionType[]) {
-      emotionScores[emotion] = 0;
+    for (const emotion of Object.keys(EMOTIONS)) {
+      emotionScores.set(emotion as EmotionType, 0);
     }
 
-    // 1. Explicit emotion (highest weight)
     if (this.explicitEmotion) {
-      emotionScores[this.explicitEmotion] += 0.8;
+      const currentScore = emotionScores.get(this.explicitEmotion) ?? 0;
+      emotionScores.set(this.explicitEmotion, currentScore + 0.8);
       signalsUsed.push('explicit_button');
     }
 
-    // 2. Tap pattern analysis
     const tapResult = this.analyzeTapPatterns();
     if (tapResult.emotion !== 'unknown') {
-      emotionScores[tapResult.emotion] += tapResult.confidence * 0.5;
+      const currentScore = emotionScores.get(tapResult.emotion) ?? 0;
+      emotionScores.set(tapResult.emotion, currentScore + tapResult.confidence * 0.5);
       signalsUsed.push('tap_pattern');
     }
 
-    // 3. Phrase sentiment analysis
     const phraseResult = this.analyzePhraseSentiment();
     if (phraseResult.emotion !== 'unknown') {
-      emotionScores[phraseResult.emotion] += phraseResult.confidence * 0.4;
+      const currentScore = emotionScores.get(phraseResult.emotion) ?? 0;
+      emotionScores.set(phraseResult.emotion, currentScore + phraseResult.confidence * 0.4);
       signalsUsed.push('phrase_sentiment');
     }
 
@@ -209,14 +226,13 @@ class EmotionServiceClass {
       };
     }
 
-    // Find emotion with highest score
     let detectedEmotion: EmotionType = 'calm';
     let maxScore = 0;
 
-    for (const [emotion, score] of Object.entries(emotionScores)) {
+    for (const [emotion, score] of emotionScores.entries()) {
       if (score > maxScore) {
         maxScore = score;
-        detectedEmotion = emotion as EmotionType;
+        detectedEmotion = emotion;
       }
     }
 

@@ -186,6 +186,10 @@ export const STORAGE_KEYS = {
   LLM_CACHE: '@speakeasy/llm_cache',
   CUSTOM_PHRASES: '@speakeasy/custom_phrases',
   SAVED_LOCATIONS: '@speakeasy/saved_locations',
+  CURRENT_LOCATION: '@speakeasy/current_location',
+  EXPLICIT_EMOTION: '@speakeasy/explicit_emotion',
+  TAP_HISTORY: '@speakeasy/tap_history',
+  PHRASE_SENTIMENT_HISTORY: '@speakeasy/phrase_sentiment_history',
 };
 
 export const DEFAULT_LOCATION_RADIUS = 150;

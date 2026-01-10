@@ -5,7 +5,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS, DEFAULT_LOCATION_RADIUS } from '../constants';
-import { UserSettings, Phrase, CaregiverContact, CustomPhrase, SavedLocation, LocationType } from '../types';
+import { UserSettings, Phrase, CaregiverContact, CustomPhrase, SavedLocation, LocationType, EmotionType, TapSignal } from '../types';
 import { generateId } from '../utils/hash';
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -20,6 +20,11 @@ const DEFAULT_SETTINGS: UserSettings = {
   highContrast: false,
   hasCompletedOnboarding: false,
 };
+
+interface LLMCacheEntry {
+  response: string;
+  timestamp: number;
+}
 
 class StorageServiceClass {
   /**
@@ -316,6 +321,105 @@ class StorageServiceClass {
     const locations = await this.getSavedLocations();
     return locations.find((l) => l.type === type) || null;
   }
+async saveCurrentLocation(location: LocationType, isAutoDetected: boolean): Promise<void> {
+    try {
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.CURRENT_LOCATION,
+        JSON.stringify({ location, isAutoDetected, timestamp: Date.now() })
+      );
+    } catch (error) {
+      if (__DEV__) console.error('Error saving current location:', error);
+    }
+  }
+
+  async getCurrentLocation(): Promise<{ location: LocationType; isAutoDetected: boolean } | null> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.CURRENT_LOCATION);
+      if (!data) return null;
+      const parsed = JSON.parse(data);
+      return { location: parsed.location, isAutoDetected: parsed.isAutoDetected };
+    } catch (error) {
+      if (__DEV__) console.error('Error getting current location:', error);
+      return null;
+    }
+  }
+
+  async saveExplicitEmotion(emotion: EmotionType | null): Promise<void> {
+    try {
+      if (emotion === null) {
+        await AsyncStorage.removeItem(STORAGE_KEYS.EXPLICIT_EMOTION);
+      } else {
+        await AsyncStorage.setItem(
+          STORAGE_KEYS.EXPLICIT_EMOTION,
+          JSON.stringify({ emotion, timestamp: Date.now() })
+        );
+      }
+    } catch (error) {
+      if (__DEV__) console.error('Error saving explicit emotion:', error);
+    }
+  }
+
+  async getExplicitEmotion(): Promise<EmotionType | null> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.EXPLICIT_EMOTION);
+      if (!data) return null;
+      const parsed = JSON.parse(data);
+      const maxAge = 30 * 60 * 1000;
+      if (Date.now() - parsed.timestamp > maxAge) {
+        await AsyncStorage.removeItem(STORAGE_KEYS.EXPLICIT_EMOTION);
+        return null;
+      }
+      return parsed.emotion;
+    } catch (error) {
+      if (__DEV__) console.error('Error getting explicit emotion:', error);
+      return null;
+    }
+  }
+
+  async saveTapHistory(tapHistory: TapSignal[]): Promise<void> {
+    try {
+      const recentTaps = tapHistory.slice(-20);
+      await AsyncStorage.setItem(STORAGE_KEYS.TAP_HISTORY, JSON.stringify(recentTaps));
+    } catch (error) {
+      if (__DEV__) console.error('Error saving tap history:', error);
+    }
+  }
+
+  async getTapHistory(): Promise<TapSignal[]> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.TAP_HISTORY);
+      if (!data) return [];
+      const taps: TapSignal[] = JSON.parse(data);
+      const maxAge = 5 * 60 * 1000;
+      return taps.filter(tap => Date.now() - tap.timestamp < maxAge);
+    } catch (error) {
+      if (__DEV__) console.error('Error getting tap history:', error);
+      return [];
+    }
+  }
+
+  async savePhrasesSentimentHistory(phrases: { timestamp: number; phrase: string }[]): Promise<void> {
+    try {
+      const recentPhrases = phrases.slice(-10);
+      await AsyncStorage.setItem(STORAGE_KEYS.PHRASE_SENTIMENT_HISTORY, JSON.stringify(recentPhrases));
+    } catch (error) {
+      if (__DEV__) console.error('Error saving phrase sentiment history:', error);
+    }
+  }
+
+  async getPhraseSentimentHistory(): Promise<{ timestamp: number; phrase: string }[]> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.PHRASE_SENTIMENT_HISTORY);
+      if (!data) return [];
+      const phrases: { timestamp: number; phrase: string }[] = JSON.parse(data);
+      const maxAge = 10 * 60 * 1000;
+      return phrases.filter(p => Date.now() - p.timestamp < maxAge);
+    } catch (error) {
+      if (__DEV__) console.error('Error getting phrase sentiment history:', error);
+      return [];
+    }
+  }
+
   async clearAllData(): Promise<void> {
     try {
       await AsyncStorage.multiRemove([
@@ -325,16 +429,17 @@ class StorageServiceClass {
         STORAGE_KEYS.FAVORITES,
         STORAGE_KEYS.LLM_CACHE,
         STORAGE_KEYS.SAVED_LOCATIONS,
+        STORAGE_KEYS.CURRENT_LOCATION,
+        STORAGE_KEYS.EXPLICIT_EMOTION,
+        STORAGE_KEYS.TAP_HISTORY,
+        STORAGE_KEYS.PHRASE_SENTIMENT_HISTORY,
       ]);
     } catch (error) {
       if (__DEV__) console.error('Error clearing data:', error);
     }
   }
 
-  /**
-   * Cache LLM response
-   */
-  async cacheLLMResponse(key: string, response: any): Promise<void> {
+  async cacheLLMResponse(key: string, response: string): Promise<void> {
     try {
       const cache = await this.getLLMCache();
       cache[key] = {
@@ -342,24 +447,20 @@ class StorageServiceClass {
         timestamp: Date.now(),
       };
 
-      // Keep cache size reasonable (max 50 entries)
       const entries = Object.entries(cache);
       if (entries.length > 50) {
-        entries.sort((a, b) => (b[1] as any).timestamp - (a[1] as any).timestamp);
+        entries.sort((a, b) => b[1].timestamp - a[1].timestamp);
         const trimmedCache = Object.fromEntries(entries.slice(0, 50));
         await AsyncStorage.setItem(STORAGE_KEYS.LLM_CACHE, JSON.stringify(trimmedCache));
       } else {
         await AsyncStorage.setItem(STORAGE_KEYS.LLM_CACHE, JSON.stringify(cache));
       }
-    } catch (error) {
-      if (__DEV__) console.error('Error caching LLM response:', error);
+    } catch (_error) {
+      if (__DEV__) console.error('Error caching LLM response:', _error);
     }
   }
 
-  /**
-   * Get cached LLM response
-   */
-  async getCachedLLMResponse(key: string, maxAge: number = 30 * 60 * 1000): Promise<any | null> {
+  async getCachedLLMResponse(key: string, maxAge: number = 30 * 60 * 1000): Promise<string | null> {
     try {
       const cache = await this.getLLMCache();
       const entry = cache[key];
@@ -369,20 +470,17 @@ class StorageServiceClass {
       }
 
       return null;
-    } catch (error) {
-      if (__DEV__) console.error('Error getting cached LLM response:', error);
+    } catch (_error) {
+      if (__DEV__) console.error('Error getting cached LLM response:', _error);
       return null;
     }
   }
 
-  /**
-   * Get entire LLM cache
-   */
-  private async getLLMCache(): Promise<Record<string, { response: any; timestamp: number }>> {
+  private async getLLMCache(): Promise<Record<string, LLMCacheEntry>> {
     try {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.LLM_CACHE);
       return data ? JSON.parse(data) : {};
-    } catch (error) {
+    } catch {
       return {};
     }
   }

@@ -6,8 +6,15 @@ import {
   Dimensions,
   Pressable,
   FlatList,
-  Animated,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  interpolate,
+  Extrapolation,
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useSettingsStore } from '../stores';
@@ -57,7 +64,7 @@ export default function OnboardingScreen() {
   ], [T]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
-  const scrollX = useRef(new Animated.Value(0)).current;
+  const scrollX = useSharedValue(0);
 
   const handleNext = () => {
     if (currentIndex < SLIDES.length - 1) {
@@ -87,31 +94,36 @@ export default function OnboardingScreen() {
     </View>
   );
 
+  const Dot = ({ index }: { index: number }) => {
+    const animatedStyle = useAnimatedStyle(() => {
+      const inputRange = [
+        (index - 1) * width,
+        index * width,
+        (index + 1) * width,
+      ];
+      const dotWidth = interpolate(
+        scrollX.value,
+        inputRange,
+        [8, 24, 8],
+        Extrapolation.CLAMP
+      );
+      const opacity = interpolate(
+        scrollX.value,
+        inputRange,
+        [0.3, 1, 0.3],
+        Extrapolation.CLAMP
+      );
+      return { width: dotWidth, opacity };
+    });
+
+    return <Animated.View style={[styles.dot, animatedStyle]} />;
+  };
+
   const renderDots = () => (
     <View style={styles.dotsContainer}>
-      {SLIDES.map((_, index) => {
-        const inputRange = [
-          (index - 1) * width,
-          index * width,
-          (index + 1) * width,
-        ];
-        const dotWidth = scrollX.interpolate({
-          inputRange,
-          outputRange: [8, 24, 8],
-          extrapolate: 'clamp',
-        });
-        const opacity = scrollX.interpolate({
-          inputRange,
-          outputRange: [0.3, 1, 0.3],
-          extrapolate: 'clamp',
-        });
-        return (
-          <Animated.View
-            key={index}
-            style={[styles.dot, { width: dotWidth, opacity }]}
-          />
-        );
-      })}
+      {SLIDES.map((_, index) => (
+        <Dot key={index} index={index} />
+      ))}
     </View>
   );
 
@@ -136,10 +148,9 @@ export default function OnboardingScreen() {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         bounces={false}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: false }
-        )}
+        onScroll={(event: NativeSyntheticEvent<NativeScrollEvent>) => {
+          scrollX.value = event.nativeEvent.contentOffset.x;
+        }}
         onMomentumScrollEnd={(event) => {
           const index = Math.round(event.nativeEvent.contentOffset.x / width);
           setCurrentIndex(index);

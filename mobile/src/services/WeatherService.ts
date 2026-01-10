@@ -37,7 +37,7 @@ class WeatherServiceClass {
       await this.cacheWeather(weather);
       this.cachedWeather = weather;
       return weather;
-    } catch (error) {
+    } catch {
       if (__DEV__) console.log('[Weather] API failed, using fallback');
       if (cached) {
         return { ...cached, source: 'cache' };
@@ -98,7 +98,7 @@ class WeatherServiceClass {
   }
 
   private getFallbackWeather(season: Season): WeatherData {
-    const seasonDefaults: Record<Season, Partial<WeatherData>> = {
+    const seasonDefaults: Record<Season, { temperature: number; feelsLike: number; condition: WeatherCondition; humidity: number }> = {
       spring: { temperature: 15, feelsLike: 14, condition: 'cloudy', humidity: 60 },
       summer: { temperature: 28, feelsLike: 30, condition: 'clear', humidity: 70 },
       fall: { temperature: 12, feelsLike: 10, condition: 'cloudy', humidity: 55 },
@@ -107,13 +107,13 @@ class WeatherServiceClass {
 
     const defaults = seasonDefaults[season];
     return {
-      temperature: defaults.temperature!,
-      feelsLike: defaults.feelsLike!,
-      condition: defaults.condition!,
+      temperature: defaults.temperature,
+      feelsLike: defaults.feelsLike,
+      condition: defaults.condition,
       isRaining: false,
       isSnowing: season === 'winter',
       windSpeed: 10,
-      humidity: defaults.humidity!,
+      humidity: defaults.humidity,
       timestamp: Date.now(),
       source: 'fallback',
     };
@@ -125,7 +125,7 @@ class WeatherServiceClass {
       if (cached) {
         return JSON.parse(cached);
       }
-    } catch (error) {
+    } catch {
       if (__DEV__) console.log('[Weather] Cache read error');
     }
     return null;
@@ -134,7 +134,7 @@ class WeatherServiceClass {
   private async cacheWeather(weather: WeatherData): Promise<void> {
     try {
       await AsyncStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify(weather));
-    } catch (error) {
+    } catch {
       if (__DEV__) console.log('[Weather] Cache write error');
     }
   }

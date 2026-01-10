@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -54,7 +54,7 @@ const LANGUAGES: { code: SupportedLanguage; label: string; emoji: string }[] = [
 ];
 
 export default function SettingsScreen() {
-  const router = useRouter();
+  const _router = useRouter();
   const { settings, updateSettings, isLLMReady, llmProgress, resetSettings } = useSettingsStore();
   const { refreshPredictions } = usePredictionStore();
   const { detectEmotion } = useEmotionStore();
@@ -107,7 +107,7 @@ export default function SettingsScreen() {
           T.common.error
         );
       }
-    } catch (error) {
+    } catch {
       Alert.alert(
         T.common.error,
         T.common.error

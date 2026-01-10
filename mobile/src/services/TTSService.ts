@@ -122,7 +122,9 @@ class TTSServiceClass {
 
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    } catch (e) {}
+    } catch {
+      // Haptic feedback optional - ignore failures
+    }
 
     const language = options.language ?? this.defaultLanguage;
     const voiceId = options.voiceId ?? this.getPreferredVoiceForLanguage(language);
@@ -228,7 +230,9 @@ class TTSServiceClass {
   async speakEmergency(text: string, language?: string): Promise<void> {
     try {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    } catch (e) {}
+    } catch {
+      // Haptic feedback optional
+    }
 
     await this.speak(text, {
       rate: 0.85,

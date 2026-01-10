@@ -2,7 +2,6 @@ import React, { memo, useMemo, useEffect } from 'react';
 import {
   View,
   StyleSheet,
-  ActivityIndicator,
   Text,
 } from 'react-native';
 import Animated, {
@@ -14,6 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Phrase } from '../types';
 import { PhraseCard } from './PhraseCard';
+import { SkeletonLoader } from './SkeletonLoader';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, ANIMATION } from '../constants';
 
 interface AnimatedCardWrapperProps {
@@ -92,11 +92,7 @@ export const PhraseGrid = memo(function PhraseGrid({
   }, [phrases, numColumns]);
 
   if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      </View>
-    );
+    return <SkeletonLoader numColumns={numColumns} numRows={3} cardSize={cardSize} />;
   }
 
   if (phrases.length === 0 && emptyMessage) {
@@ -185,11 +181,5 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body,
     color: COLORS.textSecondary,
     textAlign: 'center',
-  },
-  loadingContainer: {
-    padding: SPACING.xl,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 120,
   },
 });

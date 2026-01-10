@@ -14,14 +14,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useSettingsStore } from '../stores';
-import { StorageService } from '../services';
+import { StorageService as _StorageService } from '../services';
 import { COLORS, SPACING, BORDER_RADIUS } from '../constants';
 import { CaregiverContact } from '../types';
 import { generateId } from '../utils/hash';
 import { getTranslations } from '../i18n';
 
 export default function CaregiversScreen() {
-  const router = useRouter();
+  const _router = useRouter();
   const { settings, updateSettings } = useSettingsStore();
   const T = getTranslations(settings.language);
   const [caregivers, setCaregivers] = useState<CaregiverContact[]>([]);
@@ -51,6 +51,18 @@ export default function CaregiversScreen() {
     setEditingId(null);
   };
 
+  const validateEmail = (email: string): boolean => {
+    if (!email) return true;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone: string): boolean => {
+    if (!phone) return true;
+    const digitsOnly = phone.replace(/[\s\-()+ ]/g, '');
+    return digitsOnly.length >= 7 && digitsOnly.length <= 15 && /^\d+$/.test(digitsOnly);
+  };
+
   const handleSave = async () => {
     if (!form.name.trim()) {
       Alert.alert(T.common.error, T.caregivers.errorEnterName);
@@ -58,6 +70,21 @@ export default function CaregiversScreen() {
     }
     if (!form.relationship.trim()) {
       Alert.alert(T.common.error, T.caregivers.errorEnterRelationship);
+      return;
+    }
+    
+    if (form.email && !validateEmail(form.email)) {
+      Alert.alert(T.common.error, T.caregivers.errorInvalidEmail ?? 'Please enter a valid email address');
+      return;
+    }
+    
+    if (form.phone && !validatePhone(form.phone)) {
+      Alert.alert(T.common.error, T.caregivers.errorInvalidPhone ?? 'Please enter a valid phone number');
+      return;
+    }
+    
+    if (form.notifyOnEmergency && !form.phone && !form.email) {
+      Alert.alert(T.common.error, T.caregivers.errorNoContactMethod ?? 'Please add at least a phone number or email for emergency contact');
       return;
     }
 

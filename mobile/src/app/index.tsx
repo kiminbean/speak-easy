@@ -64,7 +64,7 @@ export default function HomeScreen() {
     currentWeather,
   } = usePredictionStore();
   
-  const { currentEmotion, copingPhrases } = useEmotionStore();
+  const { copingPhrases } = useEmotionStore();
   const { settings, isLLMReady } = useSettingsStore();
   const [showQuickResponses, setShowQuickResponses] = useState(false);
   const [showCustomPhrases, setShowCustomPhrases] = useState(true);

@@ -8,7 +8,7 @@ import * as Device from 'expo-device';
 import * as SMS from 'expo-sms';
 import * as Linking from 'expo-linking';
 import { Platform, Alert } from 'react-native';
-import { EmotionState, CaregiverContact, EmergencyAlert } from '../types';
+import { EmotionState, CaregiverContact, EmergencyAlert, SupportedLanguage } from '../types';
 import { EMOTIONS } from '../constants';
 import { StorageService } from './StorageService';
 import { generateId } from '../utils/hash';
@@ -158,9 +158,8 @@ class NotificationServiceClass {
     }
 
     const phoneNumbers = caregivers
-      .filter((c) => c.phone)
-      .map((c) => c.phone!)
-      .filter((phone) => phone.length > 0);
+      .map((c) => c.phone)
+      .filter((phone): phone is string => !!phone && phone.length > 0);
 
     if (phoneNumbers.length === 0) {
       return { success: false, sentCount: 0 };
@@ -194,9 +193,11 @@ class NotificationServiceClass {
     return false;
   }
 
-  async showEmergencyContactOptions(caregivers: CaregiverContact[], language: string = 'en'): Promise<void> {
-    const T = getTranslations(language as any);
-    const caregiversWithPhone = caregivers.filter((c) => c.phone);
+  async showEmergencyContactOptions(caregivers: CaregiverContact[], language: SupportedLanguage = 'en'): Promise<void> {
+    const T = getTranslations(language);
+    const caregiversWithPhone = caregivers.filter(
+      (c): c is CaregiverContact & { phone: string } => !!c.phone
+    );
     
     if (caregiversWithPhone.length === 0) {
       Alert.alert(
@@ -216,7 +217,7 @@ class NotificationServiceClass {
           { text: T.common.cancel, style: 'cancel' },
           { 
             text: `${T.notification.call} ${caregiver.phone}`, 
-            onPress: () => this.callCaregiver(caregiver.phone!) 
+            onPress: () => this.callCaregiver(caregiver.phone) 
           },
         ]
       );
@@ -225,15 +226,19 @@ class NotificationServiceClass {
 
     const buttons: Array<{ text: string; onPress: () => void; style?: string }> = caregiversWithPhone.slice(0, 3).map((caregiver) => ({
       text: `${caregiver.name} (${caregiver.relationship})`,
-      onPress: () => { this.callCaregiver(caregiver.phone!); },
+      onPress: () => { this.callCaregiver(caregiver.phone); },
     }));
     buttons.push({ text: T.common.cancel, onPress: () => {}, style: 'cancel' });
 
-    Alert.alert(T.notification.callCaregiver, T.notification.selectWhoToCall, buttons as any);
+    Alert.alert(
+      T.notification.callCaregiver, 
+      T.notification.selectWhoToCall, 
+      buttons as Parameters<typeof Alert.alert>[2]
+    );
   }
 
-  async sendCaregiverUpdate(message: string, language: string = 'en'): Promise<void> {
-    const T = getTranslations(language as any);
+  async sendCaregiverUpdate(message: string, language: SupportedLanguage = 'en'): Promise<void> {
+    const T = getTranslations(language);
     await this.sendLocalNotification({
       title: `📱 ${T.notification.updateTitle}`,
       body: message,
@@ -249,7 +254,7 @@ class NotificationServiceClass {
   async sendLocalNotification(options: {
     title: string;
     body: string;
-    data?: Record<string, any>;
+    data?: Record<string, unknown>;
     channelId?: string;
     priority?: 'default' | 'high' | 'max';
   }): Promise<string> {

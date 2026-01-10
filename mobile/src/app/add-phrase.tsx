@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { COLORS, SPACING, BORDER_RADIUS, CATEGORIES } from '../constants';
 import { StorageService, TTSService } from '../services';
-import { PhraseCategory, CustomPhrase } from '../types';
+import { PhraseCategory } from '../types';
 import { useSettingsStore } from '../stores';
 import { getTranslations } from '../i18n';
 
@@ -51,7 +51,7 @@ export default function AddPhraseScreen() {
         await StorageService.addCustomPhrase(text.trim(), category, emoji);
       }
       router.back();
-    } catch (error) {
+    } catch {
       Alert.alert(T.common.error, T.common.error);
     } finally {
       setIsSaving(false);
@@ -59,7 +59,8 @@ export default function AddPhraseScreen() {
   };
 
   const handleDelete = () => {
-    if (!params.id) return;
+    const phraseId = params.id;
+    if (!phraseId) return;
     
     Alert.alert(
       T.addPhrase.deleteConfirmTitle,
@@ -70,7 +71,7 @@ export default function AddPhraseScreen() {
           text: T.addPhrase.delete,
           style: 'destructive',
           onPress: async () => {
-            await StorageService.deleteCustomPhrase(params.id!);
+            await StorageService.deleteCustomPhrase(phraseId);
             router.back();
           },
         },
