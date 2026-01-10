@@ -5,7 +5,9 @@
 
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
-import { Platform } from 'react-native';
+import * as SMS from 'expo-sms';
+import * as Linking from 'expo-linking';
+import { Platform, Alert } from 'react-native';
 import { EmotionState, CaregiverContact, EmergencyAlert } from '../types';
 import { EMOTIONS } from '../constants';
 import { StorageService } from './StorageService';
@@ -115,9 +117,6 @@ class NotificationServiceClass {
     }
   }
 
-  /**
-   * Send notification when user selects emergency phrase
-   */
   async sendPhraseAlert(phrase: string): Promise<void> {
     const settings = await StorageService.getSettings();
 
@@ -128,6 +127,101 @@ class NotificationServiceClass {
       channelId: 'emergency',
       priority: 'high',
     });
+
+    const caregiversWithPhone = settings.caregivers.filter(
+      (c) => c.notifyOnEmergency && c.phone
+    );
+    
+    if (caregiversWithPhone.length > 0) {
+      await this.sendSMSToCaregiversSilent(
+        caregiversWithPhone,
+        `🚨 SpeakEasy Emergency\n\n${settings.name || 'User'} said: "${phrase}"\n\nPlease check on them.`
+      );
+    }
+  }
+
+  async sendSMSToCaregiversSilent(
+    caregivers: CaregiverContact[],
+    message: string
+  ): Promise<{ success: boolean; sentCount: number }> {
+    const isAvailable = await SMS.isAvailableAsync();
+    if (!isAvailable) {
+      if (__DEV__) console.log('SMS not available on this device');
+      return { success: false, sentCount: 0 };
+    }
+
+    const phoneNumbers = caregivers
+      .filter((c) => c.phone)
+      .map((c) => c.phone!)
+      .filter((phone) => phone.length > 0);
+
+    if (phoneNumbers.length === 0) {
+      return { success: false, sentCount: 0 };
+    }
+
+    try {
+      const { result } = await SMS.sendSMSAsync(phoneNumbers, message);
+      return { 
+        success: result === 'sent' || result === 'unknown',
+        sentCount: phoneNumbers.length 
+      };
+    } catch (error) {
+      if (__DEV__) console.error('Error sending SMS:', error);
+      return { success: false, sentCount: 0 };
+    }
+  }
+
+  async callCaregiver(phone: string): Promise<boolean> {
+    const phoneUrl = Platform.select({
+      ios: `tel:${phone}`,
+      android: `tel:${phone}`,
+    });
+
+    if (!phoneUrl) return false;
+
+    const canOpen = await Linking.canOpenURL(phoneUrl);
+    if (canOpen) {
+      await Linking.openURL(phoneUrl);
+      return true;
+    }
+    return false;
+  }
+
+  async showEmergencyContactOptions(caregivers: CaregiverContact[]): Promise<void> {
+    const caregiversWithPhone = caregivers.filter((c) => c.phone);
+    
+    if (caregiversWithPhone.length === 0) {
+      Alert.alert(
+        'No Contacts',
+        'No caregivers with phone numbers are set up. Please add caregiver contacts in Settings.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    if (caregiversWithPhone.length === 1) {
+      const caregiver = caregiversWithPhone[0];
+      Alert.alert(
+        `Call ${caregiver.name}?`,
+        `${caregiver.relationship}`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: `Call ${caregiver.phone}`, 
+            onPress: () => this.callCaregiver(caregiver.phone!) 
+          },
+        ]
+      );
+      return;
+    }
+
+    const buttons = caregiversWithPhone.slice(0, 3).map((caregiver) => ({
+      text: `${caregiver.name} (${caregiver.relationship})`,
+      onPress: () => this.callCaregiver(caregiver.phone!),
+    }));
+    buttons.push({ text: 'Cancel', onPress: () => {} });
+
+    Alert.alert('Call Caregiver', 'Select who to call:', buttons as any);
   }
 
   /**

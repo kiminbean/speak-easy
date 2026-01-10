@@ -25,6 +25,7 @@ import { ContextService, LLMService } from '../services';
 import { LocationType, Phrase } from '../types';
 import { getTranslations } from '../i18n';
 import { isRTLLanguage, getWritingDirection } from '../utils/rtl';
+import { WeatherCondition } from '../types';
 
 const LOCATION_EMOJIS: Record<LocationType, string> = {
   home: '🏠',
@@ -33,6 +34,16 @@ const LOCATION_EMOJIS: Record<LocationType, string> = {
   outdoor: '🌳',
   restaurant: '🍽️',
   unknown: '📍',
+};
+
+const WEATHER_EMOJIS: Record<WeatherCondition, string> = {
+  clear: '☀️',
+  cloudy: '☁️',
+  rain: '🌧️',
+  snow: '❄️',
+  storm: '⛈️',
+  fog: '🌫️',
+  unknown: '🌡️',
 };
 
 export default function HomeScreen() {
@@ -50,6 +61,7 @@ export default function HomeScreen() {
     refreshPredictions,
     loadCustomPhrases,
     quickResponses,
+    currentWeather,
   } = usePredictionStore();
   
   const { currentEmotion, copingPhrases } = useEmotionStore();
@@ -124,8 +136,9 @@ export default function HomeScreen() {
     }
   }, [autoDetectLocation]);
 
-  const handlePhrasePress = useCallback((phrase: Phrase) => {
-    console.log('Phrase selected:', phrase.text);
+  const handlePhrasePress = useCallback(async (phrase: Phrase) => {
+    // TTS is handled in PhraseCard, this callback is for additional actions
+    if (__DEV__) console.log('Phrase selected:', phrase.text);
   }, []);
 
   const handleEditPhrase = useCallback((phrase: Phrase) => {
@@ -169,13 +182,26 @@ export default function HomeScreen() {
                 )}
                 {' • '}
                 🕐 {getTimeLabel()}
+                {currentWeather && currentWeather.source !== 'fallback' && (
+                  <>
+                    {' • '}
+                    {WEATHER_EMOJIS[currentWeather.condition]} {Math.round(currentWeather.temperature)}°C
+                  </>
+                )}
               </Text>
             </View>
-            <Link href="/settings" asChild>
-              <Pressable style={styles.settingsButton}>
-                <Text style={styles.settingsIcon}>⚙️</Text>
-              </Pressable>
-            </Link>
+            <View style={styles.headerActions}>
+              <Link href="/history" asChild>
+                <Pressable style={styles.headerButton}>
+                  <Text style={styles.headerButtonIcon}>📜</Text>
+                </Pressable>
+              </Link>
+              <Link href="/settings" asChild>
+                <Pressable style={styles.headerButton}>
+                  <Text style={styles.headerButtonIcon}>⚙️</Text>
+                </Pressable>
+              </Link>
+            </View>
           </View>
 
           {isLLMReady && (
@@ -316,6 +342,7 @@ export default function HomeScreen() {
                 numColumns={2}
                 cardSize="medium"
                 onPhrasePress={handlePhrasePress}
+                onPhraseLongPress={handleEditPhrase}
               />
             ) : (
               <Text style={styles.emptyText}>
@@ -424,15 +451,20 @@ const styles = StyleSheet.create({
     color: COLORS.success,
     fontWeight: '600',
   },
-  settingsButton: {
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  headerButton: {
     padding: SPACING.sm,
     minWidth: TOUCH_TARGET.min,
     minHeight: TOUCH_TARGET.min,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  settingsIcon: {
-    fontSize: 26,
+  headerButtonIcon: {
+    fontSize: 24,
   },
   llmBadge: {
     alignSelf: 'flex-start',

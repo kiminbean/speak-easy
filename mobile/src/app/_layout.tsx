@@ -163,6 +163,13 @@ export default function RootLayout() {
             }}
           />
           <Stack.Screen
+            name="history"
+            options={{
+              title: '📜 History',
+              presentation: 'modal',
+            }}
+          />
+          <Stack.Screen
             name="onboarding"
             options={{
               headerShown: false,

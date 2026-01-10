@@ -66,6 +66,7 @@ interface PhraseGridProps {
   phrases: Phrase[];
   isLoading?: boolean;
   onPhrasePress?: (phrase: Phrase) => void;
+  onPhraseLongPress?: (phrase: Phrase) => void;
   numColumns?: number;
   cardSize?: 'small' | 'medium' | 'large';
   title?: string;
@@ -76,6 +77,7 @@ export const PhraseGrid = memo(function PhraseGrid({
   phrases,
   isLoading = false,
   onPhrasePress,
+  onPhraseLongPress,
   numColumns = 2,
   cardSize = 'medium',
   title,
@@ -127,6 +129,7 @@ export const PhraseGrid = memo(function PhraseGrid({
                 <PhraseCard
                   phrase={phrase}
                   onPress={onPhrasePress}
+                  onLongPress={onPhraseLongPress}
                   size={cardSize}
                 />
               </AnimatedCardWrapper>

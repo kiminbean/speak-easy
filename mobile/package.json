@@ -32,6 +32,7 @@
     "expo-location": "~19.0.8",
     "expo-notifications": "~0.32.3",
     "expo-router": "~6.0.21",
+    "expo-sms": "~14.0.8",
     "expo-speech": "~14.0.8",
     "expo-status-bar": "~3.0.9",
     "react": "19.1.0",

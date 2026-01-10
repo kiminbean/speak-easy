@@ -114,7 +114,13 @@ export const EmergencyButton = memo(function EmergencyButton({ onEmergency }: Em
 
     setShowModal(false);
     onEmergency?.();
-  }, [emergencyPhrases, settings.enableHaptics, settings.language, triggerEmergencyAlert, T.emergency.alertSent, onEmergency, scale]);
+
+    if (settings.caregivers.length > 0) {
+      setTimeout(() => {
+        NotificationService.showEmergencyContactOptions(settings.caregivers);
+      }, 500);
+    }
+  }, [emergencyPhrases, settings.enableHaptics, settings.language, settings.caregivers, triggerEmergencyAlert, T.emergency.alertSent, onEmergency, scale]);
 
   const handlePhraseSelect = useCallback(async (phrase: Phrase) => {
     if (settings.enableHaptics) {
