@@ -190,6 +190,51 @@ export const STORAGE_KEYS = {
 
 export const DEFAULT_LOCATION_RADIUS = 150;
 
+// Animation configurations for react-native-reanimated
+export const ANIMATION = {
+  // Spring presets
+  spring: {
+    damping: 15,
+    stiffness: 150,
+    mass: 1,
+  },
+  springBouncy: {
+    damping: 10,
+    stiffness: 180,
+    mass: 0.8,
+  },
+  springGentle: {
+    damping: 20,
+    stiffness: 120,
+    mass: 1,
+  },
+  // Timing durations (ms)
+  timing: {
+    fast: 150,
+    normal: 250,
+    slow: 400,
+  },
+  // Scale values
+  scale: {
+    pressed: 0.95,
+    longPressed: 0.92,
+    selected: 1.05,
+    bounce: 1.1,
+    pulseMin: 1.0,
+    pulseMax: 1.02,
+  },
+  // Stagger animation
+  stagger: {
+    delay: 50,
+    initialDelay: 100,
+  },
+  // Fade & translate
+  enter: {
+    translateY: 20,
+    opacity: 0,
+  },
+};
+
 export const CATEGORIES: { id: PhraseCategory; label: string; labelKo: string; emoji: string }[] = [
   { id: 'greeting', label: 'Greeting', labelKo: '인사', emoji: '👋' },
   { id: 'need', label: 'Need', labelKo: '필요', emoji: '🆘' },

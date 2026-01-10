@@ -7,13 +7,98 @@ import {
   Pressable,
   AccessibilityInfo,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { EmotionType } from '../types';
 import { EMOTIONS } from '../constants';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY, TOUCH_TARGET } from '../constants';
+import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY, TOUCH_TARGET, ANIMATION } from '../constants';
 import { useEmotionStore, useSettingsStore } from '../stores';
 import { t } from '../i18n';
 import { isRTLLanguage, getWritingDirection } from '../utils/rtl';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+interface EmotionButtonProps {
+  emotionId: EmotionType;
+  emotion: typeof EMOTIONS[EmotionType];
+  emotionLabel: string;
+  isSelected: boolean;
+  isDetected: boolean;
+  onPress: () => void;
+  lang: string;
+}
+
+const EmotionButton = memo(function EmotionButton({
+  emotionId,
+  emotion,
+  emotionLabel,
+  isSelected,
+  isDetected,
+  onPress,
+  lang,
+}: EmotionButtonProps) {
+  const scale = useSharedValue(1);
+  const backgroundColor = useSharedValue(isSelected ? 1 : 0);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = useCallback(() => {
+    scale.value = withSpring(ANIMATION.scale.pressed, ANIMATION.spring);
+  }, [scale]);
+
+  const handlePressOut = useCallback(() => {
+    scale.value = withSpring(1, ANIMATION.spring);
+  }, [scale]);
+
+  const handlePress = useCallback(() => {
+    if (!isSelected) {
+      scale.value = withSequence(
+        withSpring(ANIMATION.scale.bounce, ANIMATION.springBouncy),
+        withSpring(ANIMATION.scale.selected, ANIMATION.spring)
+      );
+    } else {
+      scale.value = withSpring(1, ANIMATION.spring);
+    }
+    onPress();
+  }, [isSelected, scale, onPress]);
+
+  return (
+    <AnimatedPressable
+      style={[
+        styles.button,
+        { borderColor: emotion.color },
+        isSelected && [styles.buttonSelected, { backgroundColor: emotion.color }],
+        isDetected && styles.buttonDetected,
+        animatedStyle,
+      ]}
+      onPress={handlePress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      accessibilityRole="button"
+      accessibilityLabel={`${emotionLabel} ${emotion.emoji}`}
+      accessibilityState={{ selected: isSelected }}
+      accessibilityHint={isSelected ? t(lang, 'emotions.emotionCleared') : t(lang, 'emotions.feelingSelected').replace('%s', emotionLabel)}
+    >
+      <Text style={styles.emoji}>{emotion.emoji}</Text>
+      <Text
+        style={[
+          styles.buttonText,
+          isSelected && styles.buttonTextSelected,
+        ]}
+      >
+        {emotionLabel}
+      </Text>
+    </AnimatedPressable>
+  );
+});
 
 interface EmotionSelectorProps {
   onSelect?: (emotion: EmotionType) => void;
@@ -74,31 +159,16 @@ export const EmotionSelector = memo(function EmotionSelector({ onSelect }: Emoti
           const isDetected = currentEmotion?.emotion === emotionId && !explicitEmotion;
 
           return (
-            <Pressable
+            <EmotionButton
               key={emotionId}
-              style={({ pressed }) => [
-                styles.button,
-                { borderColor: emotion.color },
-                isSelected && [styles.buttonSelected, { backgroundColor: emotion.color }],
-                isDetected && styles.buttonDetected,
-                pressed && styles.buttonPressed,
-              ]}
+              emotionId={emotionId}
+              emotion={emotion}
+              emotionLabel={emotionLabel}
+              isSelected={isSelected}
+              isDetected={isDetected}
               onPress={() => handlePress(emotionId)}
-              accessibilityRole="button"
-              accessibilityLabel={`${emotionLabel} ${emotion.emoji}`}
-              accessibilityState={{ selected: isSelected }}
-              accessibilityHint={isSelected ? t(lang, 'emotions.emotionCleared') : t(lang, 'emotions.feelingSelected').replace('%s', emotionLabel)}
-            >
-              <Text style={styles.emoji}>{emotion.emoji}</Text>
-              <Text
-                style={[
-                  styles.buttonText,
-                  isSelected && styles.buttonTextSelected,
-                ]}
-              >
-                {emotionLabel}
-              </Text>
-            </Pressable>
+              lang={lang}
+            />
           );
         })}
       </ScrollView>
@@ -138,10 +208,6 @@ const styles = StyleSheet.create({
   buttonDetected: {
     borderStyle: 'dashed',
     backgroundColor: COLORS.backgroundSecondary,
-  },
-  buttonPressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.97 }],
   },
   emoji: {
     fontSize: 22,

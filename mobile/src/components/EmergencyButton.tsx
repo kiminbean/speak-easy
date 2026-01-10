@@ -1,4 +1,4 @@
-import React, { useState, memo, useCallback, useMemo } from 'react';
+import React, { useState, memo, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,18 @@ import {
   Modal,
   AccessibilityInfo,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withRepeat,
+  withSequence,
+  withTiming,
+  cancelAnimation,
+  Easing,
+} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY, TOUCH_TARGET } from '../constants';
+import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY, TOUCH_TARGET, ANIMATION } from '../constants';
 import { TTSService, NotificationService } from '../services';
 import { useEmotionStore, useSettingsStore } from '../stores';
 import { PhraseCard } from './PhraseCard';
@@ -16,6 +26,8 @@ import { getTranslations } from '../i18n';
 import { getEmergencyPhrasesForLanguage } from '../i18n/phrases';
 import { Phrase } from '../types';
 import { isRTLLanguage } from '../utils/rtl';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface EmergencyButtonProps {
   onEmergency?: () => void;
@@ -28,6 +40,34 @@ export const EmergencyButton = memo(function EmergencyButton({ onEmergency }: Em
   const T = getTranslations(settings.language);
   const isRTL = isRTLLanguage(settings.language);
 
+  const scale = useSharedValue(1);
+  const pulseScale = useSharedValue(1);
+
+  useEffect(() => {
+    pulseScale.value = withRepeat(
+      withSequence(
+        withTiming(ANIMATION.scale.pulseMax, { 
+          duration: 1000,
+          easing: Easing.inOut(Easing.ease),
+        }),
+        withTiming(ANIMATION.scale.pulseMin, { 
+          duration: 1000,
+          easing: Easing.inOut(Easing.ease),
+        })
+      ),
+      -1,
+      true
+    );
+
+    return () => {
+      cancelAnimation(pulseScale);
+    };
+  }, [pulseScale]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value * pulseScale.value }],
+  }));
+
   const emergencyPhrases = useMemo(() => {
     const texts = getEmergencyPhrasesForLanguage(settings.language);
     return texts.map((text, index): Phrase => ({
@@ -39,6 +79,14 @@ export const EmergencyButton = memo(function EmergencyButton({ onEmergency }: Em
     }));
   }, [settings.language]);
 
+  const handlePressIn = useCallback(() => {
+    scale.value = withSpring(ANIMATION.scale.pressed, ANIMATION.spring);
+  }, [scale]);
+
+  const handlePressOut = useCallback(() => {
+    scale.value = withSpring(1, ANIMATION.spring);
+  }, [scale]);
+
   const handleEmergencyPress = useCallback(async () => {
     if (settings.enableHaptics) {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -47,6 +95,11 @@ export const EmergencyButton = memo(function EmergencyButton({ onEmergency }: Em
   }, [settings.enableHaptics]);
 
   const handleQuickEmergency = useCallback(async () => {
+    scale.value = withSequence(
+      withSpring(ANIMATION.scale.longPressed, ANIMATION.springBouncy),
+      withSpring(1, ANIMATION.spring)
+    );
+
     const phrase = emergencyPhrases[0].text;
 
     if (settings.enableHaptics) {
@@ -61,7 +114,7 @@ export const EmergencyButton = memo(function EmergencyButton({ onEmergency }: Em
 
     setShowModal(false);
     onEmergency?.();
-  }, [emergencyPhrases, settings.enableHaptics, settings.language, triggerEmergencyAlert, T.emergency.alertSent, onEmergency]);
+  }, [emergencyPhrases, settings.enableHaptics, settings.language, triggerEmergencyAlert, T.emergency.alertSent, onEmergency, scale]);
 
   const handlePhraseSelect = useCallback(async (phrase: Phrase) => {
     if (settings.enableHaptics) {
@@ -77,13 +130,15 @@ export const EmergencyButton = memo(function EmergencyButton({ onEmergency }: Em
 
   return (
     <>
-      <Pressable
-        style={({ pressed }) => [
+      <AnimatedPressable
+        style={[
           styles.button,
           isRTL && styles.buttonRTL,
-          pressed && styles.buttonPressed,
+          animatedStyle,
         ]}
         onPress={handleEmergencyPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
         onLongPress={handleQuickEmergency}
         delayLongPress={500}
         accessibilityRole="button"
@@ -92,7 +147,7 @@ export const EmergencyButton = memo(function EmergencyButton({ onEmergency }: Em
       >
         <Text style={[styles.emoji, isRTL && styles.emojiRTL]}>🆘</Text>
         <Text style={styles.text}>{T.emergency.title.toUpperCase()}</Text>
-      </Pressable>
+      </AnimatedPressable>
 
       <Modal
         visible={showModal}
@@ -156,10 +211,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     minHeight: TOUCH_TARGET.large,
     ...SHADOWS.emergency,
-  },
-  buttonPressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.98 }],
   },
   emoji: {
     fontSize: 32,

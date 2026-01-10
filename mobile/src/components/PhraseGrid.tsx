@@ -1,13 +1,66 @@
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useEffect } from 'react';
 import {
   View,
   StyleSheet,
   ActivityIndicator,
   Text,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withDelay,
+  Easing,
+} from 'react-native-reanimated';
 import { Phrase } from '../types';
 import { PhraseCard } from './PhraseCard';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../constants';
+import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, ANIMATION } from '../constants';
+
+interface AnimatedCardWrapperProps {
+  children: React.ReactNode;
+  index: number;
+  numColumns: number;
+}
+
+const AnimatedCardWrapper = memo(function AnimatedCardWrapper({
+  children,
+  index,
+  numColumns,
+}: AnimatedCardWrapperProps) {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(ANIMATION.enter.translateY);
+
+  useEffect(() => {
+    const delay = ANIMATION.stagger.initialDelay + (index * ANIMATION.stagger.delay);
+    
+    opacity.value = withDelay(
+      delay,
+      withTiming(1, { 
+        duration: ANIMATION.timing.normal,
+        easing: Easing.out(Easing.ease),
+      })
+    );
+    
+    translateY.value = withDelay(
+      delay,
+      withTiming(0, { 
+        duration: ANIMATION.timing.normal,
+        easing: Easing.out(Easing.ease),
+      })
+    );
+  }, [index, opacity, translateY]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  return (
+    <Animated.View style={[styles.cardContainer, { flex: 1 / numColumns }, animatedStyle]}>
+      {children}
+    </Animated.View>
+  );
+});
 
 interface PhraseGridProps {
   phrases: Phrase[];
@@ -52,6 +105,8 @@ export const PhraseGrid = memo(function PhraseGrid({
     );
   }
 
+  let cardIndex = 0;
+
   return (
     <View style={styles.container}>
       {title && (
@@ -61,19 +116,22 @@ export const PhraseGrid = memo(function PhraseGrid({
       )}
       {rows.map((row, rowIndex) => (
         <View key={`row_${rowIndex}`} style={styles.row}>
-          {row.map((phrase) => (
-            <View 
-              key={phrase.id} 
-              style={[styles.cardContainer, { flex: 1 / numColumns }]}
-            >
-              <PhraseCard
-                phrase={phrase}
-                onPress={onPhrasePress}
-                size={cardSize}
-              />
-            </View>
-          ))}
-          {/* Fill empty spaces if row is incomplete */}
+          {row.map((phrase) => {
+            const currentIndex = cardIndex++;
+            return (
+              <AnimatedCardWrapper
+                key={phrase.id}
+                index={currentIndex}
+                numColumns={numColumns}
+              >
+                <PhraseCard
+                  phrase={phrase}
+                  onPress={onPhrasePress}
+                  size={cardSize}
+                />
+              </AnimatedCardWrapper>
+            );
+          })}
           {row.length < numColumns &&
             Array(numColumns - row.length)
               .fill(null)

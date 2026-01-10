@@ -6,12 +6,21 @@ import {
   Pressable,
   AccessibilityInfo,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  runOnJS,
+} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Phrase } from '../types';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TOUCH_TARGET } from '../constants';
+import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TOUCH_TARGET, ANIMATION } from '../constants';
 import { TTSService } from '../services';
 import { useEmotionStore, usePredictionStore, useSettingsStore } from '../stores';
 import { isRTLLanguage, getWritingDirection } from '../utils/rtl';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface PhraseCardProps {
   phrase: Phrase;
@@ -40,10 +49,23 @@ export const PhraseCard = memo(function PhraseCard({
   const isRTL = isRTLLanguage(settings.language);
   const writingDirection = getWritingDirection(settings.language);
 
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = useCallback(() => {
+    scale.value = withSpring(ANIMATION.scale.pressed, ANIMATION.spring);
+  }, [scale]);
+
+  const handlePressOut = useCallback(() => {
+    scale.value = withSpring(1, ANIMATION.spring);
+  }, [scale]);
+
   const handlePress = useCallback(async () => {
     const startTime = Date.now();
 
-    // Haptic feedback
     if (settings.enableHaptics) {
       if (phrase.isEmergency) {
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -58,25 +80,22 @@ export const PhraseCard = memo(function PhraseCard({
       await TTSService.speak(phrase.text, { language: settings.language });
     }
 
-    // Record for emotion analysis
     const duration = Date.now() - startTime;
     recordTap(1, duration);
     recordPhrase(phrase.text);
-
-    // Add to recent phrases
     addRecentPhrase(phrase.text);
-
-    // Callback
     onPress?.(phrase);
-
-    // Accessibility announcement
     AccessibilityInfo.announceForAccessibility(`Said: ${phrase.text}`);
-  }, [phrase, settings.enableHaptics, recordTap, recordPhrase, addRecentPhrase, onPress]);
+  }, [phrase, settings.enableHaptics, settings.language, recordTap, recordPhrase, addRecentPhrase, onPress]);
 
   const handleLongPress = useCallback(async () => {
+    scale.value = withSpring(ANIMATION.scale.longPressed, ANIMATION.springBouncy);
+    
     if (settings.enableHaptics) {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     }
+
+    scale.value = withSpring(1, ANIMATION.spring);
 
     if (onLongPress) {
       onLongPress(phrase);
@@ -92,7 +111,7 @@ export const PhraseCard = memo(function PhraseCard({
     AccessibilityInfo.announceForAccessibility(
       newFavoriteState ? `Added ${phrase.text} to favorites` : `Removed ${phrase.text} from favorites`
     );
-  }, [phrase, settings.enableHaptics, localFavorite, toggleFavorite, onLongPress, onFavoriteToggle]);
+  }, [phrase, settings.enableHaptics, localFavorite, toggleFavorite, onLongPress, onFavoriteToggle, scale]);
 
   const sizeStyles = useMemo(() => ({
     small: styles.cardSmall,
@@ -109,17 +128,19 @@ export const PhraseCard = memo(function PhraseCard({
   const isFavorite = localFavorite || phrase.isFavorite;
 
   return (
-    <Pressable
-      style={({ pressed }) => [
+    <AnimatedPressable
+      style={[
         styles.card,
         sizeStyles[size],
         highlighted && styles.cardHighlighted,
         phrase.isEmergency && styles.cardEmergency,
         isFavorite && styles.cardFavorite,
-        pressed && styles.cardPressed,
         settings.highContrast && styles.cardHighContrast,
+        animatedStyle,
       ]}
       onPress={handlePress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
       onLongPress={handleLongPress}
       delayLongPress={400}
       accessibilityRole="button"
@@ -150,7 +171,7 @@ export const PhraseCard = memo(function PhraseCard({
       >
         {phrase.text}
       </Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 });
 
@@ -210,10 +231,6 @@ const styles = StyleSheet.create({
     borderColor: COLORS.accent,
     borderWidth: 2,
     backgroundColor: COLORS.accent + '05',
-  },
-  cardPressed: {
-    transform: [{ scale: 0.97 }],
-    opacity: 0.9,
   },
   cardHighContrast: {
     borderWidth: 3,
