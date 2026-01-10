@@ -81,7 +81,7 @@ export const PhraseGrid = memo(function PhraseGrid({
   numColumns = 2,
   cardSize = 'medium',
   title,
-  emptyMessage = 'No phrases available',
+  emptyMessage,
 }: PhraseGridProps) {
   const rows = useMemo(() => {
     const result: Phrase[][] = [];
@@ -99,12 +99,16 @@ export const PhraseGrid = memo(function PhraseGrid({
     );
   }
 
-  if (phrases.length === 0) {
+  if (phrases.length === 0 && emptyMessage) {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>{emptyMessage}</Text>
       </View>
     );
+  }
+  
+  if (phrases.length === 0) {
+    return null;
   }
 
   let cardIndex = 0;

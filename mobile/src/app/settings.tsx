@@ -162,10 +162,11 @@ export default function SettingsScreen() {
     detectEmotion(language);
 
     if (needsRestart) {
+      const newT = getTranslations(language);
       Alert.alert(
-        isRTLLanguage(language) ? 'RTL Layout Enabled' : 'LTR Layout Enabled',
-        'Please restart the app to apply the layout direction change.',
-        [{ text: T.common.ok }]
+        isRTLLanguage(language) ? newT.layout.rtlEnabled : newT.layout.ltrEnabled,
+        newT.layout.restartRequired,
+        [{ text: newT.common.ok }]
       );
     }
   };

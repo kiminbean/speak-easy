@@ -15,7 +15,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { EmotionType } from '../types';
+import { EmotionType, SupportedLanguage } from '../types';
 import { EMOTIONS } from '../constants';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY, TOUCH_TARGET, ANIMATION } from '../constants';
 import { useEmotionStore, useSettingsStore } from '../stores';
@@ -31,7 +31,7 @@ interface EmotionButtonProps {
   isSelected: boolean;
   isDetected: boolean;
   onPress: () => void;
-  lang: string;
+  lang: SupportedLanguage;
 }
 
 const EmotionButton = memo(function EmotionButton({

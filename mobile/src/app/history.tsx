@@ -85,9 +85,9 @@ export default function HistoryScreen() {
       <SafeAreaView style={styles.container} edges={['bottom']}>
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyIcon}>📜</Text>
-          <Text style={styles.emptyTitle}>{T.history?.noHistory || 'No History Yet'}</Text>
+          <Text style={styles.emptyTitle}>{T.history.noHistory}</Text>
           <Text style={styles.emptySubtitle}>
-            {T.history?.noHistoryHint || 'Phrases you speak will appear here'}
+            {T.history.noHistoryHint}
           </Text>
         </View>
       </SafeAreaView>
@@ -97,7 +97,7 @@ export default function HistoryScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <Text style={styles.headerHint}>
-        {T.history?.tapToSpeak || 'Tap any phrase to speak it again'}
+        {T.history.tapToSpeak}
       </Text>
       <FlatList
         data={history}

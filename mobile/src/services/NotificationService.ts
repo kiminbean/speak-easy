@@ -12,6 +12,7 @@ import { EmotionState, CaregiverContact, EmergencyAlert } from '../types';
 import { EMOTIONS } from '../constants';
 import { StorageService } from './StorageService';
 import { generateId } from '../utils/hash';
+import { getTranslations } from '../i18n';
 
 // Configure notification handling
 Notifications.setNotificationHandler({
@@ -93,6 +94,7 @@ class NotificationServiceClass {
   ): Promise<void> {
     const emotionInfo = EMOTIONS[emotion.emotion];
     const settings = await StorageService.getSettings();
+    const T = getTranslations(settings.language);
 
     // Create alert record
     const alert: EmergencyAlert = {
@@ -103,10 +105,13 @@ class NotificationServiceClass {
       phrase,
     };
 
+    const userName = settings.name || 'User';
+    const emotionLabel = T.emotions[emotion.emotion as keyof typeof T.emotions] || emotionInfo.label;
+    
     // Send local notification
     await this.sendLocalNotification({
-      title: '🚨 SpeakEasy Alert',
-      body: `${settings.name || 'User'} needs attention. Emotion: ${emotionInfo.emoji} ${emotionInfo.label} (${emotion.intensity})${phrase ? `. Said: "${phrase}"` : ''}`,
+      title: `🚨 ${T.notification.alertTitle}`,
+      body: `${T.notification.userNeedsAttention.replace('%s', userName)}. ${emotionInfo.emoji} ${emotionLabel} (${emotion.intensity})${phrase ? `. ${T.notification.userSaid.replace('%s', userName).replace('%s', phrase)}` : ''}`,
       data: { type: 'emergency', alert },
       channelId: 'emergency',
       priority: 'max',
@@ -119,10 +124,12 @@ class NotificationServiceClass {
 
   async sendPhraseAlert(phrase: string): Promise<void> {
     const settings = await StorageService.getSettings();
+    const T = getTranslations(settings.language);
+    const userName = settings.name || 'User';
 
     await this.sendLocalNotification({
-      title: '⚠️ SpeakEasy: Help Requested',
-      body: `${settings.name || 'User'} said: "${phrase}"`,
+      title: `⚠️ ${T.notification.helpRequested}`,
+      body: T.notification.userSaid.replace('%s', userName).replace('%s', phrase),
       data: { type: 'phrase_alert', phrase },
       channelId: 'emergency',
       priority: 'high',
@@ -135,7 +142,7 @@ class NotificationServiceClass {
     if (caregiversWithPhone.length > 0) {
       await this.sendSMSToCaregiversSilent(
         caregiversWithPhone,
-        `🚨 SpeakEasy Emergency\n\n${settings.name || 'User'} said: "${phrase}"\n\nPlease check on them.`
+        `🚨 ${T.notification.alertTitle}\n\n${T.notification.userSaid.replace('%s', userName).replace('%s', phrase)}`
       );
     }
   }
@@ -187,14 +194,15 @@ class NotificationServiceClass {
     return false;
   }
 
-  async showEmergencyContactOptions(caregivers: CaregiverContact[]): Promise<void> {
+  async showEmergencyContactOptions(caregivers: CaregiverContact[], language: string = 'en'): Promise<void> {
+    const T = getTranslations(language as any);
     const caregiversWithPhone = caregivers.filter((c) => c.phone);
     
     if (caregiversWithPhone.length === 0) {
       Alert.alert(
-        'No Contacts',
-        'No caregivers with phone numbers are set up. Please add caregiver contacts in Settings.',
-        [{ text: 'OK' }]
+        T.notification.noContacts,
+        T.notification.noContactsMessage,
+        [{ text: T.common.ok }]
       );
       return;
     }
@@ -202,12 +210,12 @@ class NotificationServiceClass {
     if (caregiversWithPhone.length === 1) {
       const caregiver = caregiversWithPhone[0];
       Alert.alert(
-        `Call ${caregiver.name}?`,
+        `${T.notification.call} ${caregiver.name}?`,
         `${caregiver.relationship}`,
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: T.common.cancel, style: 'cancel' },
           { 
-            text: `Call ${caregiver.phone}`, 
+            text: `${T.notification.call} ${caregiver.phone}`, 
             onPress: () => this.callCaregiver(caregiver.phone!) 
           },
         ]
@@ -215,21 +223,19 @@ class NotificationServiceClass {
       return;
     }
 
-    const buttons = caregiversWithPhone.slice(0, 3).map((caregiver) => ({
+    const buttons: Array<{ text: string; onPress: () => void; style?: string }> = caregiversWithPhone.slice(0, 3).map((caregiver) => ({
       text: `${caregiver.name} (${caregiver.relationship})`,
-      onPress: () => this.callCaregiver(caregiver.phone!),
+      onPress: () => { this.callCaregiver(caregiver.phone!); },
     }));
-    buttons.push({ text: 'Cancel', onPress: () => {} });
+    buttons.push({ text: T.common.cancel, onPress: () => {}, style: 'cancel' });
 
-    Alert.alert('Call Caregiver', 'Select who to call:', buttons as any);
+    Alert.alert(T.notification.callCaregiver, T.notification.selectWhoToCall, buttons as any);
   }
 
-  /**
-   * Send caregiver update notification
-   */
-  async sendCaregiverUpdate(message: string): Promise<void> {
+  async sendCaregiverUpdate(message: string, language: string = 'en'): Promise<void> {
+    const T = getTranslations(language as any);
     await this.sendLocalNotification({
-      title: '📱 SpeakEasy Update',
+      title: `📱 ${T.notification.updateTitle}`,
       body: message,
       data: { type: 'update' },
       channelId: 'caregiver',

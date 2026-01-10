@@ -18,6 +18,7 @@ import {
 import { useSettingsStore, usePredictionStore } from '../stores';
 import { COLORS } from '../constants';
 import { configureRTLRequiresRestart, isRTLLanguage } from '../utils/rtl';
+import { getTranslations } from '../i18n';
 
 export default function RootLayout() {
   const router = useRouter();
@@ -92,6 +93,7 @@ export default function RootLayout() {
   }, [isInitializing, settings.hasCompletedOnboarding, segments]);
 
   const { llmProgress } = useSettingsStore();
+  const T = getTranslations(settings.language);
 
   if (isInitializing) {
     return (
@@ -130,42 +132,42 @@ export default function RootLayout() {
           <Stack.Screen
             name="index"
             options={{
-              title: '🗣️ SpeakEasy',
+              title: `🗣️ ${T.nav.home}`,
               headerTitleAlign: 'center',
             }}
           />
           <Stack.Screen
             name="settings"
             options={{
-              title: '⚙️ Settings',
+              title: `⚙️ ${T.nav.settings}`,
               presentation: 'modal',
             }}
           />
           <Stack.Screen
             name="add-phrase"
             options={{
-              title: '➕ Add Phrase',
+              title: `➕ ${T.nav.addPhrase}`,
               presentation: 'modal',
             }}
           />
           <Stack.Screen
             name="favorites"
             options={{
-              title: '⭐ Favorites',
+              title: `⭐ ${T.nav.favorites}`,
               presentation: 'modal',
             }}
           />
           <Stack.Screen
             name="caregivers"
             options={{
-              title: '👨‍👩‍👧 Caregivers',
+              title: `👨‍👩‍👧 ${T.nav.caregivers}`,
               presentation: 'modal',
             }}
           />
           <Stack.Screen
             name="history"
             options={{
-              title: '📜 History',
+              title: `📜 ${T.nav.history}`,
               presentation: 'modal',
             }}
           />

@@ -117,7 +117,7 @@ export const EmergencyButton = memo(function EmergencyButton({ onEmergency }: Em
 
     if (settings.caregivers.length > 0) {
       setTimeout(() => {
-        NotificationService.showEmergencyContactOptions(settings.caregivers);
+        NotificationService.showEmergencyContactOptions(settings.caregivers, settings.language);
       }, 500);
     }
   }, [emergencyPhrases, settings.enableHaptics, settings.language, settings.caregivers, triggerEmergencyAlert, T.emergency.alertSent, onEmergency, scale]);
