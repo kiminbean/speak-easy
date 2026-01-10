@@ -124,7 +124,7 @@ export const usePredictionStore = create<PredictionState>((set, get) => ({
     } catch (error) {
       if (requestId !== currentPredictionRequest) return;
       
-      console.error('Error loading predictions:', error);
+      if (__DEV__) console.error('Error loading predictions:', error);
       set({
         error: error instanceof Error ? error.message : 'Failed to load predictions',
         isLoading: false,
@@ -179,7 +179,7 @@ export const usePredictionStore = create<PredictionState>((set, get) => ({
 
       return result;
     } catch (error) {
-      console.error('Error auto-detecting location:', error);
+      if (__DEV__) console.error('Error auto-detecting location:', error);
       set({
         isAutoDetecting: false,
         isLocationAutoDetected: false,
@@ -221,7 +221,7 @@ export const usePredictionStore = create<PredictionState>((set, get) => ({
         get().refreshPredictions();
       }
     } catch (error) {
-      console.error('Error refreshing weather:', error);
+      if (__DEV__) console.error('Error refreshing weather:', error);
       set({ isLoadingWeather: false });
     }
   },

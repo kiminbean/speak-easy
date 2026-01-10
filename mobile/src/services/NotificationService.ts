@@ -49,7 +49,7 @@ class NotificationServiceClass {
       });
     }
 
-    console.log('NotificationService initialized');
+    if (__DEV__) console.log('NotificationService initialized');
   }
 
   /**
@@ -57,7 +57,7 @@ class NotificationServiceClass {
    */
   async requestPermissions(): Promise<boolean> {
     if (!Device.isDevice) {
-      console.log('Notifications require a physical device');
+      if (__DEV__) console.log('Notifications require a physical device');
       return false;
     }
 
@@ -71,13 +71,13 @@ class NotificationServiceClass {
       }
 
       if (finalStatus !== 'granted') {
-        console.log('Notification permissions not granted');
+        if (__DEV__) console.log('Notification permissions not granted');
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error requesting notification permissions:', error);
+      if (__DEV__) console.error('Error requesting notification permissions:', error);
       return false;
     }
   }
@@ -110,8 +110,9 @@ class NotificationServiceClass {
       priority: 'max',
     });
 
-    // Log the alert
-    console.log('Emergency alert sent:', alert);
+    if (__DEV__) {
+      console.log('Emergency alert sent:', alert.id);
+    }
   }
 
   /**
@@ -171,7 +172,7 @@ class NotificationServiceClass {
 
       return notificationId;
     } catch (error) {
-      console.error('Error sending notification:', error);
+      if (__DEV__) console.error('Error sending notification:', error);
       throw error;
     }
   }
@@ -192,14 +193,18 @@ class NotificationServiceClass {
   ): () => void {
     const receivedSubscription = Notifications.addNotificationReceivedListener(
       (notification) => {
-        console.log('Notification received:', notification);
+        if (__DEV__) {
+          console.log('Notification received:', notification.request.identifier);
+        }
         onNotificationReceived?.(notification);
       }
     );
 
     const responseSubscription = Notifications.addNotificationResponseReceivedListener(
       (response) => {
-        console.log('Notification response:', response);
+        if (__DEV__) {
+          console.log('Notification response:', response.notification.request.identifier);
+        }
         onNotificationResponse?.(response);
       }
     );

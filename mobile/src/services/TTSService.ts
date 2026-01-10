@@ -40,9 +40,9 @@ class TTSServiceClass {
       }));
       
       this.selectBestVoices();
-      console.log(`TTS initialized with ${this.availableVoices.length} voices`);
+      if (__DEV__) console.log(`TTS initialized with ${this.availableVoices.length} voices`);
     } catch (error) {
-      console.error('TTS initialization error:', error);
+      if (__DEV__) console.error('TTS initialization error:', error);
     }
   }
 
@@ -53,7 +53,7 @@ class TTSServiceClass {
       const bestVoice = this.findBestVoiceForLanguage(lang);
       if (bestVoice) {
         this.preferredVoices.set(lang, bestVoice.identifier);
-        console.log(`[TTS] Best ${lang} voice: ${bestVoice.name} (${bestVoice.quality})`);
+        if (__DEV__) console.log(`[TTS] Best ${lang} voice: ${bestVoice.name} (${bestVoice.quality})`);
       }
     }
   }
@@ -114,7 +114,7 @@ class TTSServiceClass {
 
   async speak(text: string, options: TTSOptions = {}): Promise<void> {
     if (!text || text.trim().length === 0) {
-      console.warn('TTS: Empty text provided');
+      if (__DEV__) console.warn('TTS: Empty text provided');
       return;
     }
 
@@ -142,7 +142,7 @@ class TTSServiceClass {
       },
       onError: (error) => {
         this.isSpeaking = false;
-        console.error('TTS error:', error);
+        if (__DEV__) console.error('TTS error:', error);
         options.onError?.(new Error(String(error)));
       },
     };
@@ -150,7 +150,7 @@ class TTSServiceClass {
     try {
       Speech.speak(text, speechOptions);
     } catch (error) {
-      console.error('TTS speak error:', error);
+      if (__DEV__) console.error('TTS speak error:', error);
       this.isSpeaking = false;
       throw error;
     }
@@ -193,7 +193,7 @@ class TTSServiceClass {
       await Speech.stop();
       this.isSpeaking = false;
     } catch (error) {
-      console.error('TTS stop error:', error);
+      if (__DEV__) console.error('TTS stop error:', error);
     }
   }
 
@@ -201,7 +201,7 @@ class TTSServiceClass {
     try {
       await Speech.pause();
     } catch (error) {
-      console.error('TTS pause error:', error);
+      if (__DEV__) console.error('TTS pause error:', error);
     }
   }
 
@@ -209,7 +209,7 @@ class TTSServiceClass {
     try {
       await Speech.resume();
     } catch (error) {
-      console.error('TTS resume error:', error);
+      if (__DEV__) console.error('TTS resume error:', error);
     }
   }
 

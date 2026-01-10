@@ -56,7 +56,7 @@ export const useSettingsStore = create<SettingsStoreState>((set, get) => ({
 
       set({ settings, isLoaded: true });
     } catch (error) {
-      console.error('Error loading settings:', error);
+      if (__DEV__) console.error('Error loading settings:', error);
       set({ settings: DEFAULT_SETTINGS, isLoaded: true });
     }
   },

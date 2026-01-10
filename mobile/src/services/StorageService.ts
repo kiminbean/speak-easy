@@ -31,7 +31,7 @@ class StorageServiceClass {
       const updated = { ...current, ...settings };
       await AsyncStorage.setItem(STORAGE_KEYS.USER_SETTINGS, JSON.stringify(updated));
     } catch (error) {
-      console.error('Error saving settings:', error);
+      if (__DEV__) console.error('Error saving settings:', error);
       throw error;
     }
   }
@@ -47,7 +47,7 @@ class StorageServiceClass {
       }
       return DEFAULT_SETTINGS;
     } catch (error) {
-      console.error('Error getting settings:', error);
+      if (__DEV__) console.error('Error getting settings:', error);
       return DEFAULT_SETTINGS;
     }
   }
@@ -57,17 +57,21 @@ class StorageServiceClass {
    */
   async addPhraseToHistory(phrase: string): Promise<void> {
     try {
+      const sanitizedPhrase = this.sanitizeText(phrase, 200);
+      if (!sanitizedPhrase) return;
+
       const history = await this.getPhraseHistory();
       history.push({
-        phrase,
+        phrase: sanitizedPhrase,
         timestamp: Date.now(),
       });
 
-      // Keep only last 100 phrases
       const trimmedHistory = history.slice(-100);
       await AsyncStorage.setItem(STORAGE_KEYS.PHRASE_HISTORY, JSON.stringify(trimmedHistory));
     } catch (error) {
-      console.error('Error adding phrase to history:', error);
+      if (__DEV__) {
+        console.error('Error adding phrase to history:', error);
+      }
     }
   }
 
@@ -79,7 +83,7 @@ class StorageServiceClass {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.PHRASE_HISTORY);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('Error getting phrase history:', error);
+      if (__DEV__) console.error('Error getting phrase history:', error);
       return [];
     }
   }
@@ -112,7 +116,7 @@ class StorageServiceClass {
         return true;
       }
     } catch (error) {
-      console.error('Error toggling favorite:', error);
+      if (__DEV__) console.error('Error toggling favorite:', error);
       return false;
     }
   }
@@ -125,7 +129,7 @@ class StorageServiceClass {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.FAVORITES);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('Error getting favorites:', error);
+      if (__DEV__) console.error('Error getting favorites:', error);
       return [];
     }
   }
@@ -167,19 +171,28 @@ class StorageServiceClass {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.CUSTOM_PHRASES);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('Error getting custom phrases:', error);
+      if (__DEV__) console.error('Error getting custom phrases:', error);
       return [];
     }
   }
 
+  private sanitizeText(text: string, maxLength: number = 200): string {
+    return text.trim().slice(0, maxLength);
+  }
+
   async addCustomPhrase(text: string, category: Phrase['category'], emoji?: string): Promise<CustomPhrase> {
+    const sanitizedText = this.sanitizeText(text, 200);
+    if (!sanitizedText) {
+      throw new Error('Phrase text cannot be empty');
+    }
+
     const phrases = await this.getCustomPhrases();
     const now = Date.now();
     const newPhrase: CustomPhrase = {
       id: `custom_${generateId()}`,
-      text,
+      text: sanitizedText,
       category,
-      emoji,
+      emoji: emoji?.slice(0, 10),
       isCustom: true,
       isFavorite: false,
       usageCount: 0,
@@ -197,10 +210,25 @@ class StorageServiceClass {
     const index = phrases.findIndex((p) => p.id === id);
     
     if (index < 0) return null;
+
+    const sanitizedUpdates: Partial<Pick<CustomPhrase, 'text' | 'category' | 'emoji'>> = {};
+    if (updates.text !== undefined) {
+      const sanitizedText = this.sanitizeText(updates.text, 200);
+      if (!sanitizedText) {
+        throw new Error('Phrase text cannot be empty');
+      }
+      sanitizedUpdates.text = sanitizedText;
+    }
+    if (updates.category !== undefined) {
+      sanitizedUpdates.category = updates.category;
+    }
+    if (updates.emoji !== undefined) {
+      sanitizedUpdates.emoji = updates.emoji?.slice(0, 10);
+    }
     
     phrases[index] = {
       ...phrases[index],
-      ...updates,
+      ...sanitizedUpdates,
       updatedAt: Date.now(),
     };
     
@@ -239,7 +267,7 @@ class StorageServiceClass {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.SAVED_LOCATIONS);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('Error getting saved locations:', error);
+      if (__DEV__) console.error('Error getting saved locations:', error);
       return [];
     }
   }
@@ -299,7 +327,7 @@ class StorageServiceClass {
         STORAGE_KEYS.SAVED_LOCATIONS,
       ]);
     } catch (error) {
-      console.error('Error clearing data:', error);
+      if (__DEV__) console.error('Error clearing data:', error);
     }
   }
 
@@ -324,7 +352,7 @@ class StorageServiceClass {
         await AsyncStorage.setItem(STORAGE_KEYS.LLM_CACHE, JSON.stringify(cache));
       }
     } catch (error) {
-      console.error('Error caching LLM response:', error);
+      if (__DEV__) console.error('Error caching LLM response:', error);
     }
   }
 
@@ -342,7 +370,7 @@ class StorageServiceClass {
 
       return null;
     } catch (error) {
-      console.error('Error getting cached LLM response:', error);
+      if (__DEV__) console.error('Error getting cached LLM response:', error);
       return null;
     }
   }

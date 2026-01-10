@@ -35,7 +35,7 @@ class PredictionServiceClass {
 
   initialize(llm?: LLMInterface): void {
     this.llm = llm || null;
-    console.log(`PredictionService initialized. LLM available: ${!!this.llm}`);
+    if (__DEV__) console.log(`PredictionService initialized. LLM available: ${!!this.llm}`);
   }
 
   isLLMAvailable(): boolean {
@@ -102,7 +102,7 @@ class PredictionServiceClass {
         latencyMs: Date.now() - startTime,
       };
     } catch (error) {
-      console.log('[Prediction] LLM enhancement failed');
+      if (__DEV__) console.log('[Prediction] LLM enhancement failed');
       return null;
     }
   }

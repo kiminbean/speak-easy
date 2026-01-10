@@ -41,7 +41,7 @@ class ContextServiceClass {
       this.locationPermissionGranted = status === 'granted';
       return this.locationPermissionGranted;
     } catch (error) {
-      console.error('Location permission error:', error);
+      if (__DEV__) console.error('Location permission error:', error);
       return false;
     }
   }
@@ -52,7 +52,7 @@ class ContextServiceClass {
       this.locationPermissionGranted = status === 'granted';
       return this.locationPermissionGranted;
     } catch (error) {
-      console.error('Location permission check error:', error);
+      if (__DEV__) console.error('Location permission check error:', error);
       return false;
     }
   }
@@ -107,7 +107,7 @@ class ContextServiceClass {
 
       return this.lastGPSCoordinates;
     } catch (error) {
-      console.error('GPS fetch error:', error);
+      if (__DEV__) console.error('GPS fetch error:', error);
       return null;
     }
   }
@@ -172,7 +172,7 @@ class ContextServiceClass {
     const coords = await this.getCurrentGPSCoordinates();
 
     if (!coords) {
-      console.error('Cannot save location: GPS not available');
+      if (__DEV__) console.error('Cannot save location: GPS not available');
       return null;
     }
 

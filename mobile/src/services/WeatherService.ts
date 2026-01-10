@@ -38,7 +38,7 @@ class WeatherServiceClass {
       this.cachedWeather = weather;
       return weather;
     } catch (error) {
-      console.log('[Weather] API failed, using fallback');
+      if (__DEV__) console.log('[Weather] API failed, using fallback');
       if (cached) {
         return { ...cached, source: 'cache' };
       }
@@ -126,7 +126,7 @@ class WeatherServiceClass {
         return JSON.parse(cached);
       }
     } catch (error) {
-      console.log('[Weather] Cache read error');
+      if (__DEV__) console.log('[Weather] Cache read error');
     }
     return null;
   }
@@ -135,7 +135,7 @@ class WeatherServiceClass {
     try {
       await AsyncStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify(weather));
     } catch (error) {
-      console.log('[Weather] Cache write error');
+      if (__DEV__) console.log('[Weather] Cache write error');
     }
   }
 
