@@ -1,11 +1,13 @@
 import React, { Component, ReactNode } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants';
+import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TOUCH_TARGET } from '../constants';
+import { getTranslations, SupportedLanguage } from '../i18n';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+  language?: SupportedLanguage;
 }
 
 interface ErrorBoundaryState {
@@ -41,13 +43,15 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         return this.props.fallback;
       }
 
+      const T = getTranslations(this.props.language || 'en');
+
       return (
         <View style={styles.container}>
           <View style={styles.content}>
-            <Text style={styles.emoji}>⚠️</Text>
-            <Text style={styles.title}>Something went wrong</Text>
+            <Text style={styles.emoji} accessibilityLabel={T.errorBoundary?.warningIcon || 'Warning'}>⚠️</Text>
+            <Text style={styles.title}>{T.errorBoundary?.title || 'Something went wrong'}</Text>
             <Text style={styles.message}>
-              The app encountered an unexpected error. Please try again.
+              {T.errorBoundary?.message || 'The app encountered an unexpected error. Please try again.'}
             </Text>
             {__DEV__ && this.state.error && (
               <Text style={styles.errorDetail}>{this.state.error.message}</Text>
@@ -56,9 +60,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               style={styles.retryButton}
               onPress={this.handleRetry}
               accessibilityRole="button"
-              accessibilityLabel="Try again"
+              accessibilityLabel={T.errorBoundary?.tryAgain || 'Try again'}
             >
-              <Text style={styles.retryText}>Try Again</Text>
+              <Text style={styles.retryText}>{T.errorBoundary?.tryAgain || 'Try Again'}</Text>
             </Pressable>
           </View>
         </View>
@@ -116,6 +120,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.xl,
     borderRadius: BORDER_RADIUS.lg,
     minWidth: 140,
+    minHeight: TOUCH_TARGET.min,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   retryText: {
     color: COLORS.onPrimary,

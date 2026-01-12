@@ -71,7 +71,7 @@ export default function RootLayout() {
         setInitStatus('Loading phrases...');
         await loadPredictions();
 
-        console.log('App initialized successfully');
+        if (__DEV__) console.log('App initialized successfully');
         setIsInitializing(false);
       } catch (error) {
         console.error('App initialization error:', error);
@@ -81,6 +81,7 @@ export default function RootLayout() {
     };
 
     initializeApp();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -95,7 +96,7 @@ export default function RootLayout() {
     } else if (!needsOnboarding && inOnboarding) {
       router.replace('/');
     }
-  }, [isInitializing, settings.hasCompletedOnboarding, segments]);
+  }, [isInitializing, settings.hasCompletedOnboarding, segments, router]);
 
   const { llmProgress } = useSettingsStore();
   const T = getTranslations(settings.language);
@@ -117,7 +118,7 @@ export default function RootLayout() {
   }
 
   return (
-    <ErrorBoundary>
+    <ErrorBoundary language={settings.language}>
       <GestureHandlerRootView style={styles.container}>
         <SafeAreaProvider>
           <StatusBar style="dark" />

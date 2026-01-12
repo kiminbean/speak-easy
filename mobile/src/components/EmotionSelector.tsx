@@ -11,6 +11,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withSequence,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { EmotionType, SupportedLanguage } from '../types';
@@ -38,6 +39,7 @@ const EmotionButton = memo(function EmotionButton({
   isSelected,
   isDetected,
   onPress,
+  lang,
 }: EmotionButtonProps) {
   const scale = useSharedValue(1);
   const _backgroundColor = useSharedValue(isSelected ? 1 : 0);

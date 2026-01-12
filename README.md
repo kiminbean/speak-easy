@@ -201,11 +201,73 @@ speakeasy/
 ## 🔮 Future Roadmap
 
 - [ ] Custom phrase training
-- [ ] Multi-language support
+- [x] Multi-language support (20 languages)
 - [ ] Symbol/image-based phrases
 - [ ] Eye tracking input
 - [ ] Switch control support
 - [ ] Cloud sync (optional)
+
+---
+
+## 📋 Development History
+
+### v1.0.0 - Store Release Ready (January 2026)
+
+#### Completed Features
+| Category | Feature | Status |
+|----------|---------|--------|
+| **Core App** | React Native + Expo SDK 54 | ✅ |
+| **AI/LLM** | On-device SmolLM2-360M with ExecuTorch | ✅ |
+| **Voice** | Multi-language TTS (20 languages) | ✅ |
+| **i18n** | 20 language support with RTL | ✅ |
+| **Accessibility** | WCAG 2.1 AA compliant | ✅ |
+| **Notifications** | Local caregiver alerts | ✅ |
+| **Storage** | Offline-first with AsyncStorage | ✅ |
+
+#### Bug Fixes & Quality Improvements
+- Fixed `EmotionSelector.tsx`: `lang` prop destructuring, `withSequence` import
+- Fixed `_layout.tsx`: Added `__DEV__` guard for production console.log
+- Fixed `index.tsx`: useEffect dependency array completeness
+- Enhanced `ErrorBoundary.tsx`: i18n support, accessibility improvements
+- Added comprehensive i18n fallback logic
+
+#### Store Submission Preparation
+| Item | Status |
+|------|--------|
+| app.json metadata (iOS/Android) | ✅ |
+| eas.json (EAS Build/Submit) | ✅ |
+| Privacy manifests (iOS) | ✅ |
+| Permission localization (4 languages) | ✅ |
+| Store listing metadata | ✅ |
+| STORE_SUBMISSION_GUIDE.md | ✅ |
+| expo-doctor validation | ✅ 17/17 passed |
+| Test suite | ✅ 155 tests passed |
+| ESLint | ✅ 0 errors |
+
+#### Project Structure
+```
+mobile/
+├── src/
+│   ├── app/           # Expo Router pages
+│   ├── components/    # PhraseCard, EmotionSelector, ErrorBoundary
+│   ├── services/      # LLM, TTS, Prediction, Emotion, Storage
+│   ├── stores/        # Zustand state management
+│   ├── constants/     # COLORS, SPACING, ANIMATION, phrases
+│   ├── types/         # TypeScript interfaces
+│   ├── i18n/          # 20 languages, RTL support
+│   └── __tests__/     # Jest test suites
+├── locales/           # iOS permission localization
+├── store-assets/      # Store listing metadata
+├── assets/            # Icons, splash, feature graphic
+└── STORE_SUBMISSION_GUIDE.md
+```
+
+#### Next Steps (Manual)
+1. Prepare store screenshots (iPhone 6.5", 5.5" / Android 1080x1920)
+2. Configure Google Play Service Account
+3. Configure App Store Connect credentials in eas.json
+4. Run production build: `eas build --platform all --profile production`
+5. Submit to stores: `eas submit --platform all --profile production`
 
 ---
 

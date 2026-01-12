@@ -1,0 +1,12 @@
+{
+  "language": "ko",
+  "title": "SpeakEasy - AAC 의사소통",
+  "shortDescription": "비언어 장애인을 위한 AI 의사소통 앱. 100% 오프라인, 100% 무료.",
+  "fullDescription": "SpeakEasy는 비언어 장애인이 효과적으로 의사소통할 수 있도록 돕는 무료 AI 기반 보완대체의사소통(AAC) 앱입니다.\n\n기존 AAC 기기는 1,000만원-2,000만원.\nSpeakEasy는 무료이며 100% 오프라인으로 작동합니다.\n\n주요 기능:\n\n🤖 스마트 AI 예측\n온디바이스 AI가 상황(시간, 장소, 습관)을 학습하여 가장 필요한 구문을 추천합니다. 인터넷 불필요.\n\n🔒 완벽한 개인정보 보호\n모든 데이터는 사용자 기기에만 저장됩니다. 계정, 추적, 데이터 수집 없음. 대화 내용은 완전히 비공개.\n\n😊 감정 인식\n현재 기분을 선택하면 감정에 맞는 지원 구문을 제공합니다.\n\n🚨 긴급 지원\n도움이 필요할 때 한 번의 터치로 보호자에게 즉시 알림을 보냅니다.\n\n🌍 20개 언어 지원\n한국어, 영어, 일본어, 스페인어, 프랑스어, 독일어, 포르투갈어, 러시아어, 아랍어, 힌디어 등.\n\n♿ 완벽한 접근성\n접근성을 고려한 설계: 큰 터치 영역, 고대비 모드, 햅틱 피드백, 스크린 리더 지원.\n\n대상 사용자:\n• 자폐 스펙트럼 장애인\n• 뇌졸중 생존자\n• 뇌성마비 환자\n• ALS/운동신경병 환자\n• 의사소통 지원이 필요한 모든 분\n\n100% 무료. 광고 없음. 구독 없음.\n\n\"7천만 명의 사람들이 목소리를 필요로 합니다. SpeakEasy가 가능하게 합니다.\"",
+  "keywords": "AAC,의사소통,음성,비언어,자폐,접근성,텍스트음성변환,보조기기,장애,실어증",
+  "category": "의료",
+  "contentRating": "전체이용가",
+  "privacyPolicyUrl": "https://github.com/kiminbean/speak-easy/blob/main/PRIVACY_POLICY.md",
+  "supportUrl": "https://github.com/kiminbean/speak-easy/issues",
+  "websiteUrl": "https://github.com/kiminbean/speak-easy"
+}

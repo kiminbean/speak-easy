@@ -216,6 +216,12 @@ const translations = {
       excited: 'Excited',
       unknown: 'Unknown',
     },
+    errorBoundary: {
+      warningIcon: 'Warning',
+      title: 'Something went wrong',
+      message: 'The app encountered an unexpected error. Please try again.',
+      tryAgain: 'Try Again',
+    },
   },
   ko: {
     appName: 'SpeakEasy',
@@ -430,6 +436,12 @@ const translations = {
       excited: '신나요',
       unknown: '모르겠어요',
     },
+    errorBoundary: {
+      warningIcon: '경고',
+      title: '문제가 발생했습니다',
+      message: '앱에서 예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.',
+      tryAgain: '다시 시도',
+    },
   },
   ja: {
     appName: 'SpeakEasy',
@@ -643,6 +655,12 @@ const translations = {
       scared: '怖い',
       excited: 'ワクワク',
       unknown: '分からない',
+    },
+    errorBoundary: {
+      warningIcon: '警告',
+      title: '問題が発生しました',
+      message: 'アプリで予期しないエラーが発生しました。もう一度お試しください。',
+      tryAgain: 'もう一度試す',
     },
   },
   es: {
@@ -1361,9 +1379,16 @@ const translations = {
 };
 
 export type Translations = typeof translations.en;
+export type { SupportedLanguage } from '../types';
+
+const DEFAULT_ERROR_BOUNDARY = translations.en.errorBoundary;
 
 export function getTranslations(language: SupportedLanguage): Translations {
-  return translations[language] || translations.en;
+  const trans = translations[language] || translations.en;
+  if (!('errorBoundary' in trans)) {
+    return { ...trans, errorBoundary: DEFAULT_ERROR_BOUNDARY } as Translations;
+  }
+  return trans as Translations;
 }
 
 export function t(language: SupportedLanguage, key: string): string {

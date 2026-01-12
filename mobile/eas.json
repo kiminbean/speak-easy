@@ -4,20 +4,29 @@
     "appVersionSource": "local"
   },
   "build": {
+    "base": {
+      "node": "20.18.0",
+      "env": {
+        "EXPO_PUBLIC_APP_VERSION": "1.0.0"
+      }
+    },
     "development": {
+      "extends": "base",
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
         "simulator": true
       },
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleDebug"
       },
       "env": {
         "APP_ENV": "development"
       }
     },
     "preview": {
+      "extends": "base",
       "distribution": "internal",
       "ios": {
         "simulator": false
@@ -25,19 +34,24 @@
       "android": {
         "buildType": "apk"
       },
+      "channel": "preview",
       "env": {
         "APP_ENV": "preview"
       }
     },
     "production": {
-      "autoIncrement": true,
+      "extends": "base",
+      "autoIncrement": "buildNumber",
       "ios": {
-        "resourceClass": "m-medium"
+        "resourceClass": "m-medium",
+        "image": "latest"
       },
       "android": {
         "buildType": "app-bundle",
-        "resourceClass": "medium"
+        "resourceClass": "medium",
+        "image": "latest"
       },
+      "channel": "production",
       "env": {
         "APP_ENV": "production"
       }
@@ -46,13 +60,17 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "your-apple-id@example.com",
-        "ascAppId": "your-app-store-connect-app-id",
-        "appleTeamId": "YOUR_TEAM_ID"
+        "appleId": "kiminbean@gmail.com",
+        "ascAppId": "YOUR_APP_STORE_CONNECT_APP_ID",
+        "appleTeamId": "YOUR_APPLE_TEAM_ID",
+        "sku": "com.speakeasy.aac",
+        "language": "en-US"
       },
       "android": {
         "serviceAccountKeyPath": "./google-service-account.json",
-        "track": "internal"
+        "track": "internal",
+        "releaseStatus": "draft",
+        "changesNotSentForReview": true
       }
     }
   }

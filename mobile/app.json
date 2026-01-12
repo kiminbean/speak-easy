@@ -16,19 +16,29 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.speakeasy.aac",
-      "deploymentTarget": "15.1",
+      "buildNumber": "1.0.0",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "SpeakEasy uses the microphone for voice input features.",
-        "NSLocationWhenInUseUsageDescription": "SpeakEasy uses your location to suggest context-appropriate phrases.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "SpeakEasy uses your location to suggest context-appropriate phrases.",
+        "NSLocationWhenInUseUsageDescription": "SpeakEasy uses your location to suggest context-appropriate phrases based on where you are (home, school, hospital).",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "SpeakEasy uses your location to suggest context-appropriate phrases based on where you are (home, school, hospital).",
+        "NSSpeechRecognitionUsageDescription": "SpeakEasy may use speech recognition for future voice input features.",
         "UIBackgroundModes": [
           "fetch",
           "remote-notification"
         ],
-        "CFBundleAllowMixedLocalizations": true
+        "CFBundleAllowMixedLocalizations": true,
+        "ITSAppUsesNonExemptEncryption": false
       },
       "config": {
         "usesNonExemptEncryption": false
+      },
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          }
+        ]
       }
     },
     "android": {
@@ -37,14 +47,19 @@
         "backgroundColor": "#4A90D9"
       },
       "package": "com.speakeasy.aac",
+      "versionCode": 19,
       "permissions": [
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.RECORD_AUDIO",
         "android.permission.VIBRATE",
-        "android.permission.RECEIVE_BOOT_COMPLETED"
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.POST_NOTIFICATIONS"
       ],
-      "versionCode": 18
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -57,25 +72,54 @@
         "expo-notifications",
         {
           "icon": "./assets/icon.png",
-          "color": "#4A90D9"
+          "color": "#4A90D9",
+          "sounds": []
         }
       ],
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "SpeakEasy uses your location to suggest context-appropriate phrases."
+          "locationAlwaysAndWhenInUsePermission": "SpeakEasy uses your location to suggest context-appropriate phrases based on where you are (home, school, hospital).",
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 24,
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34
+          },
+          "ios": {
+            "deploymentTarget": "15.1"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "locales": {
+      "en": "./locales/en.json",
+      "ko": "./locales/ko.json",
+      "ja": "./locales/ja.json",
+      "es": "./locales/es.json"
     },
     "extra": {
       "eas": {
         "projectId": "b81d0f05-5ad9-4cee-b741-5524b4cbae4f"
       },
       "router": {}
+    },
+    "owner": "kiminbean",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/b81d0f05-5ad9-4cee-b741-5524b4cbae4f"
     }
   }
 }

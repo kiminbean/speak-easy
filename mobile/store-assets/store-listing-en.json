@@ -1,0 +1,12 @@
+{
+  "language": "en-US",
+  "title": "SpeakEasy - AAC Communication",
+  "shortDescription": "AI-powered communication app for non-verbal individuals. 100% offline, 100% free.",
+  "fullDescription": "SpeakEasy is a free, AI-powered Augmentative and Alternative Communication (AAC) app designed to help non-verbal individuals communicate effectively.\n\nTRADITIONAL AAC DEVICES COST $8,000-$15,000.\nSpeakEasy is FREE and works 100% OFFLINE.\n\nKEY FEATURES:\n\n🤖 Smart AI Predictions\nOn-device AI learns from context (time, location, habits) to suggest the phrases you need most. No internet required.\n\n🔒 Complete Privacy\nAll data stays on YOUR device. No accounts, no tracking, no data collection. Your conversations remain private.\n\n😊 Emotion-Aware\nSelect your current mood and get supportive phrases tailored to how you're feeling.\n\n🚨 Emergency Support\nOne-tap emergency button alerts caregivers instantly when you need help.\n\n🌍 20 Languages Supported\nEnglish, Korean, Japanese, Spanish, French, German, Portuguese, Russian, Arabic, Hindi, and more.\n\n♿ Fully Accessible\nDesigned with accessibility in mind: large touch targets, high contrast mode, haptic feedback, and screen reader support.\n\nWHO IS THIS FOR?\n• People with autism spectrum disorder\n• Stroke survivors\n• People with cerebral palsy\n• People with ALS/motor neuron disease\n• Anyone who needs communication support\n\n100% FREE. NO ADS. NO SUBSCRIPTIONS.\n\n\"70 million people deserve a voice. SpeakEasy makes it possible.\"",
+  "keywords": "AAC,communication,speech,non-verbal,autism,accessibility,text-to-speech,assistive,disability,aphasia",
+  "category": "Medical",
+  "contentRating": "Everyone",
+  "privacyPolicyUrl": "https://github.com/kiminbean/speak-easy/blob/main/PRIVACY_POLICY.md",
+  "supportUrl": "https://github.com/kiminbean/speak-easy/issues",
+  "websiteUrl": "https://github.com/kiminbean/speak-easy"
+}

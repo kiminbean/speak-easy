@@ -98,7 +98,7 @@ export default function HomeScreen() {
       }
     };
     initLocation();
-  }, []);
+  }, [hasAttemptedAutoDetect, autoDetectLocation]);
 
   const getGreeting = () => {
     return T.greeting[timeOfDay];
@@ -119,7 +119,7 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       loadCustomPhrases();
-    }, [])
+    }, [loadCustomPhrases])
   );
 
   const handleLocationChange = useCallback((location: LocationType) => {
@@ -136,9 +136,8 @@ export default function HomeScreen() {
     }
   }, [autoDetectLocation]);
 
-  const handlePhrasePress = useCallback(async (phrase: Phrase) => {
-    // TTS is handled in PhraseCard, this callback is for additional actions
-    if (__DEV__) console.log('Phrase selected:', phrase.text);
+  const handlePhrasePress = useCallback(async (_phrase: Phrase) => {
+    // TTS is handled in PhraseCard
   }, []);
 
   const handleEditPhrase = useCallback((phrase: Phrase) => {
