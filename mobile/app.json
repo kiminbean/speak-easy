@@ -7,7 +7,7 @@
     "icon": "./assets/icon.png",
     "scheme": "speakeasy",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -47,7 +47,7 @@
         "backgroundColor": "#4A90D9"
       },
       "package": "com.speakeasy.aac",
-      "versionCode": 19,
+      "versionCode": 21,
       "permissions": [
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION",
