@@ -18,7 +18,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY, TOUCH_TARGET, ANIMATION } from '../constants';
+import { COLORS, GLASS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY, TOUCH_TARGET, ANIMATION } from '../constants';
 import { TTSService, NotificationService } from '../services';
 import { useEmotionStore, useSettingsStore } from '../stores';
 import { PhraseCard } from './PhraseCard';
@@ -216,6 +216,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
     minHeight: TOUCH_TARGET.large,
+    borderWidth: 1,
+    borderColor: GLASS.highlight,
     ...SHADOWS.emergency,
   },
   emoji: {
@@ -234,11 +236,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.surfaceStrong,
     borderTopLeftRadius: BORDER_RADIUS.xxl,
     borderTopRightRadius: BORDER_RADIUS.xxl,
     padding: SPACING.lg,
     paddingBottom: SPACING.xxl,
+    borderWidth: 1,
+    borderColor: GLASS.border,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -283,6 +287,8 @@ const styles = StyleSheet.create({
     marginTop: SPACING.lg,
     minHeight: TOUCH_TARGET.recommended,
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: GLASS.highlight,
     ...SHADOWS.emergency,
   },
   quickHelpText: {

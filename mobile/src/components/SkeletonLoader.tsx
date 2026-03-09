@@ -7,7 +7,7 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TOUCH_TARGET } from '../constants';
+import { COLORS, GLASS, SPACING, BORDER_RADIUS, SHADOWS, TOUCH_TARGET } from '../constants';
 
 interface SkeletonCardProps {
   size?: 'small' | 'medium' | 'large';
@@ -89,14 +89,14 @@ const styles = StyleSheet.create({
     padding: SPACING.xs,
   },
   card: {
-    backgroundColor: COLORS.backgroundSecondary,
+    backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.md,
     alignItems: 'center',
     justifyContent: 'center',
     ...SHADOWS.sm,
     borderWidth: 1,
-    borderColor: COLORS.borderLight,
+    borderColor: GLASS.border,
   },
   cardSmall: {
     minHeight: TOUCH_TARGET.min + 20,
@@ -114,21 +114,21 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: BORDER_RADIUS.full,
-    backgroundColor: COLORS.border,
+    backgroundColor: COLORS.backgroundSecondary,
     marginBottom: SPACING.xs,
   },
   textPlaceholder: {
     width: '80%',
     height: 16,
     borderRadius: BORDER_RADIUS.sm,
-    backgroundColor: COLORS.border,
+    backgroundColor: COLORS.backgroundSecondary,
     marginBottom: SPACING.xs,
   },
   textPlaceholderShort: {
     width: '50%',
     height: 12,
     borderRadius: BORDER_RADIUS.sm,
-    backgroundColor: COLORS.border,
+    backgroundColor: COLORS.backgroundSecondary,
   },
 });
 

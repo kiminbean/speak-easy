@@ -16,7 +16,7 @@ import Animated, {
 import * as Haptics from 'expo-haptics';
 import { EmotionType, SupportedLanguage } from '../types';
 import { EMOTIONS } from '../constants';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY, TOUCH_TARGET, ANIMATION } from '../constants';
+import { COLORS, GLASS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY, TOUCH_TARGET, ANIMATION } from '../constants';
 import { useEmotionStore, useSettingsStore } from '../stores';
 import { t } from '../i18n';
 import { isRTLLanguage, getWritingDirection } from '../utils/rtl';
@@ -195,12 +195,14 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     borderRadius: BORDER_RADIUS.full,
     backgroundColor: COLORS.surface,
-    borderWidth: 2,
+    borderWidth: 1,
+    borderColor: GLASS.border,
     marginHorizontal: SPACING.xxs,
     minHeight: TOUCH_TARGET.min,
     ...SHADOWS.sm,
   },
   buttonSelected: {
+    borderColor: GLASS.highlight,
     ...SHADOWS.lg,
   },
   buttonDetected: {
