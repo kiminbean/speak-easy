@@ -2,7 +2,7 @@
   "expo": {
     "name": "SpeakEasy",
     "slug": "speakeasy",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "speakeasy",
@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.speakeasy.aac",
-      "buildNumber": "1.0.0",
+      "buildNumber": "1.1.0",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "SpeakEasy uses the microphone for voice input features.",
         "NSLocationWhenInUseUsageDescription": "SpeakEasy uses your location to suggest context-appropriate phrases based on where you are (home, school, hospital).",
@@ -36,7 +36,9 @@
         "NSPrivacyAccessedAPITypes": [
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
-            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
           }
         ]
       }
@@ -112,7 +114,9 @@
       "eas": {
         "projectId": "b81d0f05-5ad9-4cee-b741-5524b4cbae4f"
       },
-      "router": {}
+      "router": {},
+      "uiStyleVersion": "v2-liquid-glass",
+      "legacyUiStyleVersion": "v1-classic"
     },
     "owner": "kiminbean",
     "runtimeVersion": {

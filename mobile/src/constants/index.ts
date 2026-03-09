@@ -3,80 +3,330 @@ import { PhraseCategory } from '../types';
 export * from './emotions';
 export * from './phrases';
 
-// App-wide constants
 export const APP_NAME = 'SpeakEasy';
-export const APP_VERSION = '1.0.0';
+export const APP_VERSION = '1.1.0';
 
-// Design System - AAC Accessible Color Palette
-// WCAG 2.1 AA compliant, calming medical-appropriate colors
+export const UI_STYLE_VERSIONS = {
+  legacy: 'v1-classic',
+  liquidGlass: 'v2-liquid-glass',
+} as const;
 
-export const COLORS = {
-  // Primary - Trustworthy calming blue
-  primary: '#2563EB',
-  primaryLight: '#3B82F6',
-  primaryDark: '#1D4ED8',
-  onPrimary: '#FFFFFF',
-  
-  // Secondary - Soft teal
-  secondary: '#0D9488',
-  secondaryLight: '#14B8A6',
-  secondaryDark: '#0F766E',
-  onSecondary: '#FFFFFF',
-  
-  // Accent - Warm amber (muted)
-  accent: '#D97706',
-  accentLight: '#F59E0B',
-  accentDark: '#B45309',
-  onAccent: '#FFFFFF',
-  
-  // Emergency - Accessible red (not aggressive)
-  emergency: '#DC2626',
-  emergencyLight: '#EF4444',
-  emergencyDark: '#B91C1C',
-  emergencyBackground: '#FEF2F2',
-  onEmergency: '#FFFFFF',
-  
-  // Success - Soft green
-  success: '#059669',
-  successLight: '#10B981',
-  successDark: '#047857',
-  successBackground: '#ECFDF5',
-  onSuccess: '#FFFFFF',
-  
-  // Warning - Warm orange
-  warning: '#D97706',
-  warningLight: '#F59E0B',
-  warningBackground: '#FFFBEB',
-  onWarning: '#FFFFFF',
-  
-  // Neutral - Warm grays for readability
-  background: '#F8FAFC',
-  backgroundSecondary: '#F1F5F9',
-  surface: '#FFFFFF',
-  surfaceElevated: '#FFFFFF',
-  
-  // Text - Dark gray (not pure black) for readability
-  text: '#1E293B',
-  textSecondary: '#475569',
-  textTertiary: '#94A3B8',
-  textDisabled: '#CBD5E1',
-  
-  // Borders & Dividers
-  border: '#E2E8F0',
-  borderLight: '#F1F5F9',
-  divider: '#E2E8F0',
-  
-  // Interactive states
-  ripple: 'rgba(37, 99, 235, 0.12)',
-  overlay: 'rgba(15, 23, 42, 0.5)',
-  
-  // Semantic aliases
-  disabled: '#94A3B8',
-  textLight: '#64748B',
-  
-  // Legacy support
-  get primarySurface() { return this.primary + '15'; },
+export type UIStyleVersion = typeof UI_STYLE_VERSIONS[keyof typeof UI_STYLE_VERSIONS];
+
+export const ACTIVE_UI_STYLE_VERSION: UIStyleVersion = UI_STYLE_VERSIONS.liquidGlass;
+
+type ColorTokens = {
+  primary: string;
+  primaryLight: string;
+  primaryDark: string;
+  onPrimary: string;
+  secondary: string;
+  secondaryLight: string;
+  secondaryDark: string;
+  onSecondary: string;
+  accent: string;
+  accentLight: string;
+  accentDark: string;
+  onAccent: string;
+  emergency: string;
+  emergencyLight: string;
+  emergencyDark: string;
+  emergencyBackground: string;
+  onEmergency: string;
+  success: string;
+  successLight: string;
+  successDark: string;
+  successBackground: string;
+  onSuccess: string;
+  warning: string;
+  warningLight: string;
+  warningBackground: string;
+  onWarning: string;
+  background: string;
+  backgroundSecondary: string;
+  surface: string;
+  surfaceElevated: string;
+  surfaceStrong: string;
+  headerSurface: string;
+  inputSurface: string;
+  text: string;
+  textSecondary: string;
+  textTertiary: string;
+  textDisabled: string;
+  border: string;
+  borderLight: string;
+  divider: string;
+  ripple: string;
+  overlay: string;
+  disabled: string;
+  textLight: string;
+  primarySurface: string;
 };
+
+type GlassTokens = {
+  border: string;
+  highlight: string;
+  tint: string;
+  overlay: string;
+  shadow: string;
+  orbA: string;
+  orbB: string;
+  orbC: string;
+};
+
+type ShadowToken = {
+  shadowColor: string;
+  shadowOffset: { width: number; height: number };
+  shadowOpacity: number;
+  shadowRadius: number;
+  elevation: number;
+};
+
+type BorderRadiusTokens = {
+  xs: number;
+  sm: number;
+  md: number;
+  lg: number;
+  xl: number;
+  xxl: number;
+  full: number;
+};
+
+type ThemeTokens = {
+  colors: ColorTokens;
+  glass: GlassTokens;
+  shadows: {
+    sm: ShadowToken;
+    md: ShadowToken;
+    lg: ShadowToken;
+    xl: ShadowToken;
+    emergency: ShadowToken;
+  };
+  borderRadius: BorderRadiusTokens;
+};
+
+const LEGACY_THEME: ThemeTokens = {
+  colors: {
+    primary: '#2563EB',
+    primaryLight: '#3B82F6',
+    primaryDark: '#1D4ED8',
+    onPrimary: '#FFFFFF',
+    secondary: '#0D9488',
+    secondaryLight: '#14B8A6',
+    secondaryDark: '#0F766E',
+    onSecondary: '#FFFFFF',
+    accent: '#D97706',
+    accentLight: '#F59E0B',
+    accentDark: '#B45309',
+    onAccent: '#FFFFFF',
+    emergency: '#DC2626',
+    emergencyLight: '#EF4444',
+    emergencyDark: '#B91C1C',
+    emergencyBackground: '#FEF2F2',
+    onEmergency: '#FFFFFF',
+    success: '#059669',
+    successLight: '#10B981',
+    successDark: '#047857',
+    successBackground: '#ECFDF5',
+    onSuccess: '#FFFFFF',
+    warning: '#D97706',
+    warningLight: '#F59E0B',
+    warningBackground: '#FFFBEB',
+    onWarning: '#FFFFFF',
+    background: '#F8FAFC',
+    backgroundSecondary: '#F1F5F9',
+    surface: '#FFFFFF',
+    surfaceElevated: '#FFFFFF',
+    surfaceStrong: '#FFFFFF',
+    headerSurface: '#FFFFFF',
+    inputSurface: '#FFFFFF',
+    text: '#1E293B',
+    textSecondary: '#475569',
+    textTertiary: '#94A3B8',
+    textDisabled: '#CBD5E1',
+    border: '#E2E8F0',
+    borderLight: '#F1F5F9',
+    divider: '#E2E8F0',
+    ripple: 'rgba(37, 99, 235, 0.12)',
+    overlay: 'rgba(15, 23, 42, 0.5)',
+    disabled: '#94A3B8',
+    textLight: '#64748B',
+    primarySurface: 'rgba(37, 99, 235, 0.12)',
+  },
+  glass: {
+    border: 'rgba(255, 255, 255, 0.65)',
+    highlight: 'rgba(255, 255, 255, 0.8)',
+    tint: 'rgba(255, 255, 255, 0.2)',
+    overlay: 'rgba(255, 255, 255, 0.12)',
+    shadow: 'rgba(15, 23, 42, 0.18)',
+    orbA: 'rgba(59, 130, 246, 0.16)',
+    orbB: 'rgba(20, 184, 166, 0.14)',
+    orbC: 'rgba(245, 158, 11, 0.12)',
+  },
+  shadows: {
+    sm: {
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    md: {
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    lg: {
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    xl: {
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.12,
+      shadowRadius: 16,
+      elevation: 8,
+    },
+    emergency: {
+      shadowColor: '#DC2626',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.25,
+      shadowRadius: 8,
+      elevation: 6,
+    },
+  },
+  borderRadius: {
+    xs: 4,
+    sm: 8,
+    md: 12,
+    lg: 16,
+    xl: 20,
+    xxl: 24,
+    full: 999,
+  },
+};
+
+const LIQUID_GLASS_THEME: ThemeTokens = {
+  colors: {
+    primary: '#4D72FF',
+    primaryLight: '#7CA7FF',
+    primaryDark: '#244AC7',
+    onPrimary: '#FFFFFF',
+    secondary: '#4EC1E9',
+    secondaryLight: '#7EDAF7',
+    secondaryDark: '#1D90BE',
+    onSecondary: '#FFFFFF',
+    accent: '#F6A45A',
+    accentLight: '#FFC48A',
+    accentDark: '#D88336',
+    onAccent: '#FFFFFF',
+    emergency: '#E15A6C',
+    emergencyLight: '#FF8C9A',
+    emergencyDark: '#BE3951',
+    emergencyBackground: 'rgba(255, 231, 236, 0.82)',
+    onEmergency: '#FFFFFF',
+    success: '#2E9D80',
+    successLight: '#54C0A2',
+    successDark: '#1F7E66',
+    successBackground: 'rgba(226, 251, 243, 0.78)',
+    onSuccess: '#FFFFFF',
+    warning: '#D98934',
+    warningLight: '#F5B96A',
+    warningBackground: 'rgba(255, 245, 221, 0.8)',
+    onWarning: '#FFFFFF',
+    background: '#E9F1FB',
+    backgroundSecondary: 'rgba(255, 255, 255, 0.4)',
+    surface: 'rgba(255, 255, 255, 0.68)',
+    surfaceElevated: 'rgba(255, 255, 255, 0.78)',
+    surfaceStrong: 'rgba(255, 255, 255, 0.88)',
+    headerSurface: 'rgba(244, 248, 255, 0.86)',
+    inputSurface: 'rgba(255, 255, 255, 0.74)',
+    text: '#11233F',
+    textSecondary: '#4A617F',
+    textTertiary: '#7A8EA8',
+    textDisabled: '#A9B6C8',
+    border: 'rgba(255, 255, 255, 0.62)',
+    borderLight: 'rgba(255, 255, 255, 0.84)',
+    divider: 'rgba(92, 117, 153, 0.16)',
+    ripple: 'rgba(255, 255, 255, 0.3)',
+    overlay: 'rgba(13, 25, 45, 0.34)',
+    disabled: '#94A3B8',
+    textLight: '#677D98',
+    primarySurface: 'rgba(77, 114, 255, 0.16)',
+  },
+  glass: {
+    border: 'rgba(255, 255, 255, 0.74)',
+    highlight: 'rgba(255, 255, 255, 0.92)',
+    tint: 'rgba(255, 255, 255, 0.34)',
+    overlay: 'rgba(255, 255, 255, 0.22)',
+    shadow: 'rgba(48, 72, 109, 0.2)',
+    orbA: 'rgba(125, 164, 255, 0.34)',
+    orbB: 'rgba(101, 212, 255, 0.22)',
+    orbC: 'rgba(255, 191, 146, 0.24)',
+  },
+  shadows: {
+    sm: {
+      shadowColor: '#2A436E',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.08,
+      shadowRadius: 14,
+      elevation: 2,
+    },
+    md: {
+      shadowColor: '#2A436E',
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.12,
+      shadowRadius: 24,
+      elevation: 5,
+    },
+    lg: {
+      shadowColor: '#2A436E',
+      shadowOffset: { width: 0, height: 18 },
+      shadowOpacity: 0.15,
+      shadowRadius: 36,
+      elevation: 8,
+    },
+    xl: {
+      shadowColor: '#2A436E',
+      shadowOffset: { width: 0, height: 22 },
+      shadowOpacity: 0.18,
+      shadowRadius: 42,
+      elevation: 10,
+    },
+    emergency: {
+      shadowColor: '#E15A6C',
+      shadowOffset: { width: 0, height: 14 },
+      shadowOpacity: 0.22,
+      shadowRadius: 30,
+      elevation: 8,
+    },
+  },
+  borderRadius: {
+    xs: 6,
+    sm: 10,
+    md: 16,
+    lg: 22,
+    xl: 28,
+    xxl: 34,
+    full: 999,
+  },
+};
+
+const THEMES: Record<UIStyleVersion, ThemeTokens> = {
+  [UI_STYLE_VERSIONS.legacy]: LEGACY_THEME,
+  [UI_STYLE_VERSIONS.liquidGlass]: LIQUID_GLASS_THEME,
+};
+
+const ACTIVE_THEME = THEMES[ACTIVE_UI_STYLE_VERSION];
+
+export const AVAILABLE_THEME_VERSIONS = THEMES;
+export const COLORS = ACTIVE_THEME.colors;
+export const GLASS = ACTIVE_THEME.glass;
 
 // Emotion Colors - Soft, calming palette
 export const EMOTION_COLORS = {
@@ -90,43 +340,7 @@ export const EMOTION_COLORS = {
 };
 
 // Shadows - Subtle depth
-export const SHADOWS = {
-  sm: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  md: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  lg: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  xl: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  emergency: {
-    shadowColor: '#DC2626',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-};
+export const SHADOWS = ACTIVE_THEME.shadows;
 
 // Layout - Generous spacing for accessibility
 export const SPACING = {
@@ -146,15 +360,7 @@ export const TOUCH_TARGET = {
   large: 64,
 };
 
-export const BORDER_RADIUS = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
-  full: 999,
-};
+export const BORDER_RADIUS = ACTIVE_THEME.borderRadius;
 
 // Typography scale
 export const TYPOGRAPHY = {
