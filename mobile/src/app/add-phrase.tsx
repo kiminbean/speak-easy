@@ -12,7 +12,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { COLORS, SPACING, BORDER_RADIUS, CATEGORIES } from '../constants';
+import { ScreenBackground } from '../components';
+import { COLORS, GLASS, SHADOWS, SPACING, BORDER_RADIUS, CATEGORIES } from '../constants';
 import { StorageService, TTSService } from '../services';
 import { PhraseCategory } from '../types';
 import { useSettingsStore } from '../stores';
@@ -87,11 +88,12 @@ export default function AddPhraseScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
-        <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+      <ScreenBackground>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardView}
+        >
+          <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
           <View style={styles.section}>
             <Text style={styles.label}>
               {T.addPhrase.phraseText} *
@@ -194,8 +196,9 @@ export default function AddPhraseScreen() {
               </Pressable>
             )}
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </ScreenBackground>
     </SafeAreaView>
   );
 }
@@ -232,7 +235,7 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: GLASS.border,
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.md,
     fontSize: 16,
@@ -250,6 +253,8 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.md,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: GLASS.highlight,
   },
   testButtonText: {
     fontSize: 24,
@@ -272,12 +277,12 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.full,
-    borderWidth: 2,
-    borderColor: COLORS.border,
+    borderWidth: 1,
+    borderColor: GLASS.border,
   },
   categoryButtonActive: {
     borderColor: COLORS.primary,
-    backgroundColor: '#E8F4FD',
+    backgroundColor: COLORS.primarySurface,
   },
   categoryEmoji: {
     fontSize: 16,
@@ -303,12 +308,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.md,
-    borderWidth: 2,
-    borderColor: COLORS.border,
+    borderWidth: 1,
+    borderColor: GLASS.border,
   },
   emojiButtonActive: {
     borderColor: COLORS.primary,
-    backgroundColor: '#E8F4FD',
+    backgroundColor: COLORS.primarySurface,
   },
   emojiText: {
     fontSize: 24,
@@ -327,11 +332,9 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.md,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: GLASS.border,
+    ...SHADOWS.md,
   },
   previewEmoji: {
     fontSize: 32,
@@ -351,6 +354,8 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: GLASS.highlight,
   },
   buttonDisabled: {
     opacity: 0.6,
@@ -361,10 +366,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   deleteButton: {
-    backgroundColor: '#FFEBEE',
+    backgroundColor: COLORS.emergencyBackground,
     paddingVertical: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.emergencyLight,
   },
   deleteButtonText: {
     color: COLORS.emergency,

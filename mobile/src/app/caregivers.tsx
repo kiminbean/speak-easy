@@ -13,9 +13,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { ScreenBackground } from '../components';
 import { useSettingsStore } from '../stores';
 import { StorageService as _StorageService } from '../services';
-import { COLORS, SPACING, BORDER_RADIUS } from '../constants';
+import { COLORS, GLASS, SHADOWS, SPACING, BORDER_RADIUS } from '../constants';
 import { CaregiverContact } from '../types';
 import { generateId } from '../utils/hash';
 import { getTranslations } from '../i18n';
@@ -268,15 +269,16 @@ export default function CaregiversScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
+      <ScreenBackground>
+        <KeyboardAvoidingView
+          style={styles.keyboardView}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.content}
+            keyboardShouldPersistTaps="handled"
+          >
           {isAdding ? (
             renderForm()
           ) : (
@@ -291,14 +293,15 @@ export default function CaregiversScreen() {
             </>
           )}
 
-          <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>ℹ️ {T.caregivers.aboutEmergencyAlerts}</Text>
-            <Text style={styles.infoText}>
-              {T.caregivers.emergencyAlertInfo}
-            </Text>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+            <View style={styles.infoCard}>
+              <Text style={styles.infoTitle}>ℹ️ {T.caregivers.aboutEmergencyAlerts}</Text>
+              <Text style={styles.infoText}>
+                {T.caregivers.emergencyAlertInfo}
+              </Text>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </ScreenBackground>
     </SafeAreaView>
   );
 }
@@ -329,11 +332,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: GLASS.border,
+    ...SHADOWS.md,
   },
   caregiverInfo: {
     flex: 1,
@@ -355,7 +356,7 @@ const styles = StyleSheet.create({
   },
   emergencyBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: '#FFEBEE',
+    backgroundColor: COLORS.emergencyBackground,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 2,
     borderRadius: BORDER_RADIUS.sm,
@@ -405,13 +406,13 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: COLORS.surface,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: COLORS.primary,
-    borderStyle: 'dashed',
     borderRadius: BORDER_RADIUS.md,
     paddingVertical: SPACING.lg,
     alignItems: 'center',
     marginBottom: SPACING.lg,
+    ...SHADOWS.sm,
   },
   addButtonText: {
     color: COLORS.primary,
@@ -423,11 +424,9 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.md,
     marginBottom: SPACING.lg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: GLASS.border,
+    ...SHADOWS.md,
   },
   formTitle: {
     fontSize: 18,
@@ -450,11 +449,12 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: GLASS.border,
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.sm,
     fontSize: 16,
     color: COLORS.text,
+    backgroundColor: COLORS.inputSurface,
   },
   switchRow: {
     flexDirection: 'row',
@@ -470,12 +470,12 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.surfaceElevated,
     paddingVertical: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: GLASS.border,
   },
   cancelButtonText: {
     color: COLORS.text,
@@ -488,6 +488,8 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: GLASS.highlight,
   },
   saveButtonText: {
     color: '#FFFFFF',
@@ -495,11 +497,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   infoCard: {
-    backgroundColor: '#E8F4FD',
+    backgroundColor: COLORS.surfaceElevated,
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.md,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.primary,
+    borderWidth: 1,
+    borderColor: GLASS.border,
   },
   infoTitle: {
     fontSize: 14,

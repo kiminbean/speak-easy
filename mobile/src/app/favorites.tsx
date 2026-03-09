@@ -9,8 +9,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePredictionStore, useSettingsStore } from '../stores';
-import { PhraseCard } from '../components';
-import { COLORS, SPACING } from '../constants';
+import { PhraseCard, ScreenBackground } from '../components';
+import { COLORS, GLASS, SHADOWS, SPACING } from '../constants';
 import { Phrase } from '../types';
 import { StorageService } from '../services';
 import { getTranslations } from '../i18n';
@@ -64,31 +64,35 @@ export default function FavoritesScreen() {
   if (localFavorites.length === 0) {
     return (
       <SafeAreaView style={styles.container} edges={['bottom']}>
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>⭐</Text>
-          <Text style={styles.emptyTitle}>{T.favorites.noFavorites}</Text>
-          <Text style={styles.emptySubtitle}>
-            {T.favorites.noFavoritesHint}
-          </Text>
-        </View>
+        <ScreenBackground>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyIcon}>⭐</Text>
+            <Text style={styles.emptyTitle}>{T.favorites.noFavorites}</Text>
+            <Text style={styles.emptySubtitle}>
+              {T.favorites.noFavoritesHint}
+            </Text>
+          </View>
+        </ScreenBackground>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <Text style={styles.headerHint}>
-        {T.favorites.longPressHint}
-      </Text>
-      <FlatList
-        data={localFavorites}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-      />
+      <ScreenBackground>
+        <Text style={styles.headerHint}>
+          {T.favorites.longPressHint}
+        </Text>
+        <FlatList
+          data={localFavorites}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        />
+      </ScreenBackground>
     </SafeAreaView>
   );
 }
@@ -126,11 +130,9 @@ const styles = StyleSheet.create({
     height: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: GLASS.highlight,
+    ...SHADOWS.md,
   },
   removeButtonText: {
     color: '#fff',
