@@ -18,7 +18,8 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useSettingsStore } from '../stores';
-import { COLORS, SPACING, BORDER_RADIUS } from '../constants';
+import { ScreenBackground } from '../components';
+import { COLORS, GLASS, SHADOWS, SPACING, BORDER_RADIUS } from '../constants';
 import { getTranslations } from '../i18n';
 
 const { width } = Dimensions.get('window');
@@ -81,6 +82,14 @@ export default function OnboardingScreen() {
     await completeOnboarding();
   };
 
+  const updateIndexFromOffset = (offsetX: number) => {
+    const nextIndex = Math.min(
+      SLIDES.length - 1,
+      Math.max(0, Math.round(offsetX / width))
+    );
+    setCurrentIndex(nextIndex);
+  };
+
   const completeOnboarding = async () => {
     await updateSettings({ hasCompletedOnboarding: true });
     router.replace('/');
@@ -131,46 +140,54 @@ export default function OnboardingScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        {!isLastSlide && (
-          <Pressable style={styles.skipButton} onPress={handleSkip}>
-            <Text style={styles.skipText}>{T.onboarding.skip}</Text>
-          </Pressable>
-        )}
-      </View>
+      <ScreenBackground>
+        <View style={styles.header}>
+          {!isLastSlide && (
+            <Pressable style={styles.skipButton} onPress={handleSkip}>
+              <Text style={styles.skipText}>{T.onboarding.skip}</Text>
+            </Pressable>
+          )}
+        </View>
 
-      <FlatList
-        ref={flatListRef}
-        data={SLIDES}
-        renderItem={renderSlide}
-        keyExtractor={(item) => item.id}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        bounces={false}
-        onScroll={(event: NativeSyntheticEvent<NativeScrollEvent>) => {
-          scrollX.value = event.nativeEvent.contentOffset.x;
-        }}
-        onMomentumScrollEnd={(event) => {
-          const index = Math.round(event.nativeEvent.contentOffset.x / width);
-          setCurrentIndex(index);
-        }}
-        scrollEventThrottle={16}
-      />
+        <View style={styles.slidesContainer}>
+          <FlatList
+            ref={flatListRef}
+            data={SLIDES}
+            renderItem={renderSlide}
+            keyExtractor={(item) => item.id}
+            horizontal
+            pagingEnabled
+            scrollEnabled={!isLastSlide}
+            showsHorizontalScrollIndicator={false}
+            bounces={false}
+            style={styles.slidesList}
+            onScroll={(event: NativeSyntheticEvent<NativeScrollEvent>) => {
+              scrollX.value = event.nativeEvent.contentOffset.x;
+            }}
+            onScrollEndDrag={(event) => {
+              updateIndexFromOffset(event.nativeEvent.contentOffset.x);
+            }}
+            onMomentumScrollEnd={(event) => {
+              updateIndexFromOffset(event.nativeEvent.contentOffset.x);
+            }}
+            scrollEventThrottle={16}
+          />
+        </View>
 
-      {renderDots()}
+        {renderDots()}
 
-      <View style={styles.footer}>
-        {isLastSlide ? (
-          <Pressable style={styles.getStartedButton} onPress={handleGetStarted}>
-            <Text style={styles.getStartedText}>{T.onboarding.getStarted}</Text>
-          </Pressable>
-        ) : (
-          <Pressable style={styles.nextButton} onPress={handleNext}>
-            <Text style={styles.nextText}>{T.onboarding.next} →</Text>
-          </Pressable>
-        )}
-      </View>
+        <View style={styles.footer}>
+          {isLastSlide ? (
+            <Pressable style={styles.getStartedButton} onPress={handleGetStarted}>
+              <Text style={styles.getStartedText}>{T.onboarding.getStarted}</Text>
+            </Pressable>
+          ) : (
+            <Pressable style={styles.nextButton} onPress={handleNext}>
+              <Text style={styles.nextText}>{T.onboarding.next} →</Text>
+            </Pressable>
+          )}
+        </View>
+      </ScreenBackground>
     </SafeAreaView>
   );
 }
@@ -189,6 +206,10 @@ const styles = StyleSheet.create({
   },
   skipButton: {
     padding: SPACING.sm,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: GLASS.border,
   },
   skipText: {
     fontSize: 16,
@@ -196,10 +217,15 @@ const styles = StyleSheet.create({
   },
   slide: {
     width,
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: SPACING.xl,
+  },
+  slidesContainer: {
+    flex: 1,
+  },
+  slidesList: {
+    flex: 1,
   },
   emoji: {
     fontSize: 100,
@@ -233,14 +259,16 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: SPACING.lg,
     paddingBottom: SPACING.xl,
+    zIndex: 2,
   },
   nextButton: {
     backgroundColor: COLORS.surface,
     paddingVertical: SPACING.md,
     borderRadius: BORDER_RADIUS.lg,
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: COLORS.primary,
+    ...SHADOWS.md,
   },
   nextText: {
     fontSize: 18,
@@ -252,6 +280,9 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
     borderRadius: BORDER_RADIUS.lg,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: GLASS.highlight,
+    ...SHADOWS.md,
   },
   getStartedText: {
     fontSize: 18,

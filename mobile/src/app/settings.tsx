@@ -14,9 +14,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
 import { useRouter, Link } from 'expo-router';
 
+import { ScreenBackground } from '../components';
 import { useSettingsStore, usePredictionStore, useEmotionStore } from '../stores';
 import { TTSService, StorageService, ContextService, LLMService } from '../services';
-import { COLORS, SPACING, BORDER_RADIUS } from '../constants';
+import { ACTIVE_UI_STYLE_VERSION, APP_VERSION, COLORS, GLASS, SHADOWS, SPACING, BORDER_RADIUS } from '../constants';
 import { getTranslations } from '../i18n';
 import { SupportedLanguage, SavedLocation, LocationType } from '../types';
 import { configureRTLRequiresRestart, isRTLLanguage, getWritingDirection } from '../utils/rtl';
@@ -65,6 +66,12 @@ export default function SettingsScreen() {
   const T = getTranslations(settings.language);
   const isRTL = isRTLLanguage(settings.language);
   const writingDirection = getWritingDirection(settings.language);
+  const aiModeLabel = LLMService.isNativeMode ? T.settings.onDeviceAI : T.settings.ruleBasedMode;
+  const aiModeStatus = LLMService.isNativeMode
+    ? `🧠 ${T.settings.ready}`
+    : isLLMReady
+      ? `🤖 ${T.settings.ready}`
+      : `${llmProgress}%`;
   
   const LOCATION_TYPES: { id: LocationType; label: string; emoji: string }[] = [
     { id: 'home', label: T.locations.home, emoji: LOCATION_EMOJIS.home },
@@ -191,8 +198,9 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-        <View style={{ direction: writingDirection }}>
+      <ScreenBackground>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+          <View style={{ direction: writingDirection }}>
         {/* User Info */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>👤 {T.settings.userProfile}</Text>
@@ -263,16 +271,14 @@ export default function SettingsScreen() {
           <View style={styles.card}>
             <View style={styles.statusRow}>
               <Text style={styles.label}>
-                {LLMService.isNativeMode ? T.settings.onDeviceAI : T.settings.ruleBasedMode}
+                {aiModeLabel}
               </Text>
               <View style={[
                 styles.statusBadge, 
                 LLMService.isNativeMode ? styles.statusActive : styles.statusRuleBased
               ]}>
                 <Text style={styles.statusText}>
-                  {LLMService.isNativeMode 
-                    ? `🧠 ${T.settings.ready}` 
-                    : isLLMReady ? '📋 Active' : `${llmProgress}%`}
+                  {aiModeStatus}
                 </Text>
               </View>
             </View>
@@ -467,14 +473,16 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <View style={styles.appInfo}>
             <Text style={styles.appName}>🗣️ {T.appName}</Text>
-            <Text style={styles.appVersion}>{T.settings.version} 1.0.0</Text>
+            <Text style={styles.appVersion}>{T.settings.version} {APP_VERSION}</Text>
+            <Text style={styles.appVersion}>{ACTIVE_UI_STYLE_VERSION}</Text>
             <Text style={styles.appTagline}>
               {T.settings.tagline}
             </Text>
           </View>
         </View>
-        </View>
-      </ScrollView>
+          </View>
+        </ScrollView>
+      </ScreenBackground>
     </SafeAreaView>
   );
 }
@@ -504,11 +512,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: GLASS.border,
+    ...SHADOWS.md,
   },
   label: {
     fontSize: 15,
@@ -522,12 +528,13 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: GLASS.border,
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.sm,
     fontSize: 16,
     color: COLORS.text,
     marginTop: SPACING.sm,
+    backgroundColor: COLORS.inputSurface,
   },
   sliderRow: {
     flexDirection: 'row',
@@ -559,6 +566,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: GLASS.highlight,
   },
   testButtonText: {
     color: '#FFFFFF',
@@ -595,7 +604,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: COLORS.border,
+    backgroundColor: COLORS.divider,
     marginVertical: SPACING.xs,
   },
   caregiverRow: {
@@ -606,6 +615,9 @@ const styles = StyleSheet.create({
   addButton: {
     paddingVertical: SPACING.md,
     alignItems: 'center',
+    backgroundColor: COLORS.primarySurface,
+    borderRadius: BORDER_RADIUS.md,
+    marginTop: SPACING.md,
   },
   addButtonText: {
     color: COLORS.primary,
@@ -624,15 +636,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.md,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.surfaceElevated,
     borderRadius: BORDER_RADIUS.md,
-    borderWidth: 2,
-    borderColor: COLORS.border,
+    borderWidth: 1,
+    borderColor: GLASS.border,
     gap: SPACING.xs,
   },
   languageButtonActive: {
     borderColor: COLORS.primary,
-    backgroundColor: '#E8F4FD',
+    backgroundColor: COLORS.primarySurface,
   },
   languageEmoji: {
     fontSize: 20,
@@ -646,10 +658,12 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
   dangerButton: {
-    backgroundColor: '#FFEBEE',
+    backgroundColor: COLORS.emergencyBackground,
     paddingVertical: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.emergencyLight,
   },
   dangerButtonText: {
     color: COLORS.emergency,
