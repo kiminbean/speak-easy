@@ -14,13 +14,14 @@ import {
   PhraseGrid,
   EmotionSelector,
   EmergencyButton,
+  ScreenBackground,
 } from '../components';
 import {
   usePredictionStore,
   useEmotionStore,
   useSettingsStore,
 } from '../stores';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY, TOUCH_TARGET } from '../constants';
+import { COLORS, GLASS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY, TOUCH_TARGET } from '../constants';
 import { ContextService, LLMService } from '../services';
 import { LocationType, Phrase } from '../types';
 import { getTranslations } from '../i18n';
@@ -76,6 +77,7 @@ export default function HomeScreen() {
   const T = getTranslations(settings.language);
   const isRTL = isRTLLanguage(settings.language);
   const writingDirection = getWritingDirection(settings.language);
+  const aiStatusLabel = LLMService.isNativeMode ? T.settings.onDeviceAI : T.settings.ruleBasedMode;
   
   const LOCATIONS: { id: LocationType; label: string; emoji: string }[] = [
     { id: 'home', label: T.locations.home, emoji: LOCATION_EMOJIS.home },
@@ -158,18 +160,19 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.content}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing || isLoading}
-            onRefresh={handleRefresh}
-            colors={[COLORS.primary]}
-            tintColor={COLORS.primary}
-          />
-        }
-      >
+      <ScreenBackground>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.content}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing || isLoading}
+              onRefresh={handleRefresh}
+              colors={[COLORS.primary]}
+              tintColor={COLORS.primary}
+            />
+          }
+        >
         <View style={[styles.header, { direction: writingDirection }]}>
           <View style={[styles.headerTop, isRTL && styles.rowReverse]}>
             <View style={isRTL && styles.itemsEnd}>
@@ -206,7 +209,7 @@ export default function HomeScreen() {
           {isLLMReady && (
             <View style={[styles.llmBadge, LLMService.isNativeMode && styles.llmBadgeNative]}>
               <Text style={[styles.llmBadgeText, LLMService.isNativeMode && styles.llmBadgeTextNative]}>
-                {LLMService.isNativeMode ? '🧠' : '🤖'} {T.home.aiActive}
+                {LLMService.isNativeMode ? '🧠' : '🤖'} {aiStatusLabel}
               </Text>
             </View>
           )}
@@ -397,20 +400,21 @@ export default function HomeScreen() {
           </View>
         )}
 
-        <View style={styles.section} key={`predictions_${currentLocation}`}>
-          <Text style={styles.sectionTitle}>
-            💬 {T.home.suggestedPhrases}
-          </Text>
-          <PhraseGrid
-            phrases={predictions}
-            numColumns={2}
-            cardSize="medium"
-            isLoading={isLoading}
-            onPhrasePress={handlePhrasePress}
-            emptyMessage={T.home.pullToRefresh}
-          />
-        </View>
-      </ScrollView>
+          <View style={styles.section} key={`predictions_${currentLocation}`}>
+            <Text style={styles.sectionTitle}>
+              💬 {T.home.suggestedPhrases}
+            </Text>
+            <PhraseGrid
+              phrases={predictions}
+              numColumns={2}
+              cardSize="medium"
+              isLoading={isLoading}
+              onPhrasePress={handlePhrasePress}
+              emptyMessage={T.home.pullToRefresh}
+            />
+          </View>
+        </ScrollView>
+      </ScreenBackground>
     </SafeAreaView>
   );
 }
@@ -430,7 +434,11 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     backgroundColor: COLORS.surface,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: GLASS.border,
+    borderRadius: BORDER_RADIUS.xxl,
+    marginHorizontal: SPACING.md,
+    marginTop: SPACING.sm,
+    ...SHADOWS.lg,
   },
   headerTop: {
     flexDirection: 'row',
@@ -461,6 +469,10 @@ const styles = StyleSheet.create({
     minHeight: TOUCH_TARGET.min,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: COLORS.surfaceElevated,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: GLASS.border,
   },
   headerButtonIcon: {
     fontSize: 24,
@@ -472,13 +484,15 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.xs,
     borderRadius: BORDER_RADIUS.full,
     marginTop: SPACING.sm,
+    borderWidth: 1,
+    borderColor: GLASS.border,
   },
   llmBadgeText: {
     ...TYPOGRAPHY.captionMedium,
     color: COLORS.success,
   },
   llmBadgeNative: {
-    backgroundColor: COLORS.primary + '15',
+    backgroundColor: COLORS.primarySurface,
   },
   llmBadgeTextNative: {
     color: COLORS.primary,
@@ -524,6 +538,8 @@ const styles = StyleSheet.create({
     marginLeft: SPACING.xs,
     minHeight: TOUCH_TARGET.min,
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: GLASS.border,
   },
   retryButtonText: {
     ...TYPOGRAPHY.captionMedium,
@@ -540,6 +556,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.md,
     borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    borderColor: GLASS.border,
   },
   autoDetectedLocation: {
     ...TYPOGRAPHY.h4,
@@ -567,6 +585,12 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     minHeight: TOUCH_TARGET.min,
     justifyContent: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: GLASS.border,
+    alignSelf: 'flex-start',
+    marginHorizontal: SPACING.md,
   },
   sectionToggleText: {
     ...TYPOGRAPHY.bodySemibold,
@@ -577,6 +601,10 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     minHeight: TOUCH_TARGET.min,
     justifyContent: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: GLASS.border,
   },
   viewAllText: {
     ...TYPOGRAPHY.smallMedium,
@@ -593,15 +621,15 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.full,
-    borderWidth: 2,
-    borderColor: COLORS.border,
+    borderWidth: 1,
+    borderColor: GLASS.border,
     marginRight: SPACING.sm,
     minHeight: TOUCH_TARGET.min,
     ...SHADOWS.sm,
   },
   locationButtonActive: {
     borderColor: COLORS.primary,
-    backgroundColor: COLORS.primary + '10',
+    backgroundColor: COLORS.primarySurface,
     ...SHADOWS.md,
   },
   locationEmoji: {
@@ -628,15 +656,15 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: COLORS.surface,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: COLORS.primary,
-    borderStyle: 'dashed',
     borderRadius: BORDER_RADIUS.lg,
     paddingVertical: SPACING.md,
     alignItems: 'center',
     marginTop: SPACING.sm,
     minHeight: TOUCH_TARGET.recommended,
     justifyContent: 'center',
+    ...SHADOWS.sm,
   },
   addButtonText: {
     ...TYPOGRAPHY.bodySemibold,

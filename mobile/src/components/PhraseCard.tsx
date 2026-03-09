@@ -13,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Phrase } from '../types';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TOUCH_TARGET, ANIMATION } from '../constants';
+import { COLORS, GLASS, SPACING, BORDER_RADIUS, SHADOWS, TOUCH_TARGET, ANIMATION } from '../constants';
 import { TTSService } from '../services';
 import { useEmotionStore, usePredictionStore, useSettingsStore } from '../stores';
 import { isRTLLanguage, getWritingDirection } from '../utils/rtl';
@@ -181,8 +181,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     ...SHADOWS.md,
-    borderWidth: 1.5,
-    borderColor: COLORS.borderLight,
+    borderWidth: 1,
+    borderColor: GLASS.border,
     position: 'relative',
     minHeight: TOUCH_TARGET.recommended,
   },
@@ -190,9 +190,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: SPACING.sm,
     right: SPACING.sm,
-    backgroundColor: COLORS.accent + '20',
+    backgroundColor: COLORS.accent + '24',
     borderRadius: BORDER_RADIUS.full,
     padding: SPACING.xxs,
+    borderWidth: 1,
+    borderColor: GLASS.highlight,
   },
   favoriteIndicatorRTL: {
     right: undefined,
@@ -217,7 +219,7 @@ const styles = StyleSheet.create({
   },
   cardHighlighted: {
     borderColor: COLORS.primary,
-    backgroundColor: COLORS.primary + '08',
+    backgroundColor: COLORS.primarySurface,
     borderWidth: 2,
   },
   cardEmergency: {
@@ -228,7 +230,7 @@ const styles = StyleSheet.create({
   cardFavorite: {
     borderColor: COLORS.accent,
     borderWidth: 2,
-    backgroundColor: COLORS.accent + '05',
+    backgroundColor: COLORS.accent + '10',
   },
   cardHighContrast: {
     borderWidth: 3,
@@ -245,7 +247,7 @@ const styles = StyleSheet.create({
   text: {
     color: COLORS.text,
     textAlign: 'center',
-    fontWeight: '600',
+    fontWeight: '700',
     letterSpacing: 0.2,
   },
   textSmall: {

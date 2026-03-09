@@ -14,7 +14,7 @@ import Animated, {
 import { Phrase } from '../types';
 import { PhraseCard } from './PhraseCard';
 import { SkeletonLoader } from './SkeletonLoader';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, ANIMATION } from '../constants';
+import { COLORS, GLASS, SPACING, TYPOGRAPHY, BORDER_RADIUS, ANIMATION } from '../constants';
 
 interface AnimatedCardWrapperProps {
   children: React.ReactNode;
@@ -173,9 +173,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: SPACING.xxl,
-    backgroundColor: COLORS.backgroundSecondary,
+    backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.xl,
     marginHorizontal: SPACING.xs,
+    borderWidth: 1,
+    borderColor: GLASS.border,
   },
   emptyText: {
     ...TYPOGRAPHY.body,
