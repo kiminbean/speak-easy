@@ -204,6 +204,46 @@ describe('LLMService', () => {
 
       expect(phrases.length).toBeGreaterThan(0);
     });
+
+    it('should vary fallback suggestions by location and time', async () => {
+      const homeMorning = await LLMService.generatePredictions(
+        createContext({ locationType: 'home', timeOfDay: 'morning' }),
+        6
+      );
+      const hospitalNight = await LLMService.generatePredictions(
+        createContext({ locationType: 'hospital', timeOfDay: 'night' }),
+        6
+      );
+
+      expect(homeMorning.map((phrase) => phrase.text)).not.toEqual(
+        hospitalNight.map((phrase) => phrase.text)
+      );
+      expect(homeMorning.some((phrase) => /breakfast|cereal|cartoons/i.test(phrase.text))).toBe(true);
+      expect(hospitalNight.some((phrase) => /sleep|pain|mom|scared|water/i.test(phrase.text))).toBe(true);
+    });
+
+    it('should include weather-aware fallback suggestions when weather is provided', async () => {
+      const rainyOutdoor = await LLMService.generatePredictions(
+        createContext({
+          locationType: 'outdoor',
+          timeOfDay: 'afternoon',
+          weather: {
+            condition: 'rain',
+            isRaining: true,
+            isSnowing: false,
+            temperature: 12,
+            feelsLike: 10,
+            humidity: 88,
+            windSpeed: 8,
+            source: 'fallback',
+            timestamp: Date.now(),
+          },
+        }),
+        6
+      );
+
+      expect(rainyOutdoor.some((phrase) => /rain|umbrella|wet/i.test(phrase.text))).toBe(true);
+    });
   });
 
   describe('edge cases', () => {

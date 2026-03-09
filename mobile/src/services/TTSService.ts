@@ -1,5 +1,6 @@
 import * as Speech from 'expo-speech';
 import * as Haptics from 'expo-haptics';
+import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import { EmotionType } from '../types';
 import { TTS_DEFAULTS } from '../constants';
@@ -31,6 +32,12 @@ class TTSServiceClass {
 
   async initialize(): Promise<void> {
     try {
+      if (Platform.OS === 'ios' && !Device.isDevice) {
+        this.availableVoices = [];
+        this.preferredVoices.clear();
+        return;
+      }
+
       const voices = await Speech.getAvailableVoicesAsync();
       this.availableVoices = voices.map((v) => ({
         identifier: v.identifier,

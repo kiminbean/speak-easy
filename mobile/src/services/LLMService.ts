@@ -1,7 +1,6 @@
 import { UserContext, Phrase, PhraseCategory, SupportedLanguage } from '../types';
 import { createHash } from '../utils/hash';
-import { getLocationPhrasesForLanguage } from '../i18n/phrases';
-import { useSettingsStore } from '../stores/settingsStore';
+import { getLocationPhrasesForLanguage, getWeatherPhrasesForLanguage } from '../i18n/phrases';
 
 interface Message {
   role: 'system' | 'user' | 'assistant';
@@ -226,8 +225,12 @@ class LLMServiceClass {
     const location = context.locationType || 'unknown';
     const time = context.timeOfDay || 'morning';
     const example = LOCATION_EXAMPLES[location] || LOCATION_EXAMPLES.unknown;
+    const weatherDescription = context.weather
+      ? `${context.weather.condition}, ${Math.round(context.weather.temperature)}°C`
+      : 'unknown';
+    const recentPhrases = context.recentPhrases?.slice(-3).join(' | ') || 'none';
     
-    return `${location},${time}:${numPredictions} phrases\n${example}`;
+    return `Generate exactly ${numPredictions} short AAC phrases for a non-verbal person at ${location} during ${time}. Language: ${context.language || 'en'}. Emotion: ${context.emotionState || 'neutral'}. Season: ${context.season}. Day: ${context.dayOfWeek}. Weather: ${weatherDescription}. Recent phrases: ${recentPhrases}.\nExample: ${example}`;
   }
 
   private parsePhrasesFromResponse(response: string, limit: number): Phrase[] {
@@ -298,7 +301,10 @@ class LLMServiceClass {
     const phrases = this.getContextualPhrases(
       context.timeOfDay,
       context.locationType,
-      context.emotionState || 'neutral'
+      context.language || 'en',
+      context.emotionState || 'neutral',
+      context.weather?.condition,
+      context.weather?.temperature
     );
 
     return phrases.slice(0, limit).map((text, i) => ({
@@ -325,17 +331,63 @@ class LLMServiceClass {
   private async generateSimulatedResponse(prompt: string): Promise<string> {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    const locationMatch = prompt.match(/^(\w+),/);
-    const location = locationMatch?.[1] || 'home';
+    const locationMatch = prompt.match(/ at (home|school|hospital|restaurant|outdoor|unknown) during /i);
+    const timeMatch = prompt.match(/ during (morning|afternoon|evening|night)/i);
+    const languageMatch = prompt.match(/Language: ([a-z]+)/i);
+    const emotionMatch = prompt.match(/Emotion: ([a-z]+)/i);
+    const weatherMatch = prompt.match(/Weather: ([a-z]+)(?:, (-?\d+)[°]C)?/i);
 
-    const phrases = this.getContextualPhrases('morning', location, 'neutral');
+    const location = locationMatch?.[1]?.toLowerCase() || 'home';
+    const timeOfDay = timeMatch?.[1]?.toLowerCase() || 'morning';
+    const language = languageMatch?.[1]?.toLowerCase() || 'en';
+    const emotion = emotionMatch?.[1]?.toLowerCase() || 'neutral';
+    const weatherCondition = weatherMatch?.[1]?.toLowerCase() || 'clear';
+    const weatherTemperature = weatherMatch?.[2] ? Number(weatherMatch[2]) : 22;
+
+    const phrases = this.getContextualPhrases(
+      timeOfDay,
+      location,
+      language,
+      emotion,
+      weatherCondition,
+      weatherTemperature
+    );
 
     return JSON.stringify({ phrases });
   }
 
-  private getContextualPhrases(time: string, location: string, _emotion: string): string[] {
-    const language = useSettingsStore.getState().settings.language as SupportedLanguage;
-    return getLocationPhrasesForLanguage(language, location, time);
+  private getContextualPhrases(
+    time: string,
+    location: string,
+    language: string,
+    _emotion: string,
+    weatherCondition?: string,
+    weatherTemperature?: number
+  ): string[] {
+    const resolvedLanguage = language as SupportedLanguage;
+    const locationPhrases = getLocationPhrasesForLanguage(resolvedLanguage, location, time);
+
+    if (!weatherCondition) {
+      return locationPhrases;
+    }
+
+    const weatherPhrases = getWeatherPhrasesForLanguage(resolvedLanguage, {
+      condition: weatherCondition,
+      isRaining: weatherCondition === 'rain' || weatherCondition === 'storm',
+      isSnowing: weatherCondition === 'snow',
+      temperature: weatherTemperature ?? 22,
+      windSpeed: weatherCondition === 'storm' ? 35 : 5,
+    });
+
+    if (locationPhrases.length === 0) {
+      return weatherPhrases;
+    }
+
+    return [
+      ...locationPhrases.slice(0, 1),
+      ...weatherPhrases.slice(0, 1),
+      ...locationPhrases.slice(1),
+    ];
   }
 
   async destroy(): Promise<void> {

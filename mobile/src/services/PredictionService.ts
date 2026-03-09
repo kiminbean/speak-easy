@@ -109,6 +109,7 @@ class PredictionServiceClass {
     const phrases: Phrase[] = [];
     const confidence: number[] = [];
     const language = context.language || 'en';
+    let weatherPhraseObjects: Phrase[] = [];
 
     const weather = context.weather;
     if (weather) {
@@ -120,17 +121,12 @@ class PredictionServiceClass {
         windSpeed: weather.windSpeed,
       });
       
-      const weatherPhraseObjects: Phrase[] = weatherPhrases.slice(0, 2).map((text, index) => ({
+      weatherPhraseObjects = weatherPhrases.slice(0, 1).map((text, index) => ({
         id: `weather_${weather.condition}_${Date.now()}_${index}`,
         text,
         category: 'need' as const,
         emoji: this.getWeatherEmoji(weather),
       }));
-      
-      for (const phrase of weatherPhraseObjects) {
-        phrases.push(phrase);
-        confidence.push(0.95);
-      }
     }
 
     const allPhrases = getLocationPhrasesForLanguage(
@@ -150,10 +146,16 @@ class PredictionServiceClass {
       emoji: this.getContextualEmoji(context, index),
     }));
 
-    for (const phrase of timePhraseObjects) {
+    const prioritizedPhrases = [
+      ...timePhraseObjects.slice(0, 1),
+      ...weatherPhraseObjects,
+      ...timePhraseObjects.slice(1),
+    ];
+
+    for (const phrase of prioritizedPhrases) {
       if (phrases.length < numPredictions) {
         phrases.push(phrase);
-        confidence.push(0.8);
+        confidence.push(phrase.id.startsWith('weather_') ? 0.95 : 0.8);
       }
     }
 
@@ -191,15 +193,15 @@ class PredictionServiceClass {
 
   private shuffleAndPrioritize(phrases: string[], context: UserContext): string[] {
     const scored = phrases.map((phrase, originalIndex) => {
-      let score = 100 - originalIndex;
+      let score = 220 - (originalIndex * 8);
       
       const lowerPhrase = phrase.toLowerCase();
-      if (context.season === 'summer' && (lowerPhrase.includes('hot') || lowerPhrase.includes('cold') || lowerPhrase.includes('ice'))) score += 20;
-      if (context.season === 'winter' && (lowerPhrase.includes('cold') || lowerPhrase.includes('warm') || lowerPhrase.includes('snow'))) score += 20;
-      if (context.dayOfWeek === 'weekend' && (lowerPhrase.includes('play') || lowerPhrase.includes('fun') || lowerPhrase.includes('park'))) score += 15;
-      if (context.dayOfWeek === 'weekday' && (lowerPhrase.includes('school') || lowerPhrase.includes('work') || lowerPhrase.includes('homework'))) score += 15;
+      if (context.season === 'summer' && (lowerPhrase.includes('hot') || lowerPhrase.includes('cold') || lowerPhrase.includes('ice'))) score += 6;
+      if (context.season === 'winter' && (lowerPhrase.includes('cold') || lowerPhrase.includes('warm') || lowerPhrase.includes('snow'))) score += 6;
+      if (context.dayOfWeek === 'weekend' && (lowerPhrase.includes('play') || lowerPhrase.includes('fun') || lowerPhrase.includes('park'))) score += 4;
+      if (context.dayOfWeek === 'weekday' && (lowerPhrase.includes('school') || lowerPhrase.includes('work') || lowerPhrase.includes('homework'))) score += 4;
       
-      score += Math.random() * 10;
+      score += Math.random() * 2;
       
       return { phrase, score };
     });
@@ -336,7 +338,12 @@ class PredictionServiceClass {
     const examples = locationExamples[context.timeOfDay] || locationExamples.morning;
     const categories = ['need', 'want', 'need', 'feeling', 'need', 'want', 'need', 'social'];
     
-    return `Generate exactly ${numPredictions} short phrases for a non-verbal person at ${context.locationType} during ${context.timeOfDay}. Emotion: ${context.emotionState || 'neutral'}.
+    const weatherDescription = context.weather
+      ? `${context.weather.condition}, ${Math.round(context.weather.temperature)}°C`
+      : 'unknown';
+    const recentPhrases = context.recentPhrases?.slice(-3).join(' | ') || 'none';
+
+    return `Generate exactly ${numPredictions} short phrases for a non-verbal person at ${context.locationType} during ${context.timeOfDay}. Emotion: ${context.emotionState || 'neutral'}. Season: ${context.season}. Day: ${context.dayOfWeek}. Weather: ${weatherDescription}. Recent phrases: ${recentPhrases}.
 Return JSON: {"phrases":["phrase1","phrase2",...],"categories":["need","want",...]}
 Example: ${JSON.stringify({ phrases: examples, categories: categories })}`;
   }

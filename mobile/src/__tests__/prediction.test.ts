@@ -95,6 +95,26 @@ describe('PredictionService', () => {
       expect(result.reasoning).toContain('clear');
       expect(result.reasoning).toContain('28°C');
     });
+
+    it('should keep location-specific phrases visible across locations with the same weather', () => {
+      const weather = {
+        condition: 'rain' as const,
+        isRaining: true,
+        isSnowing: false,
+        temperature: 12,
+        windSpeed: 8,
+        feelsLike: 10,
+        humidity: 88,
+        timestamp: Date.now(),
+        source: 'fallback' as const,
+      };
+
+      const home = PredictionService.predict(createContext({ locationType: 'home', timeOfDay: 'afternoon', weather }), 6);
+      const hospital = PredictionService.predict(createContext({ locationType: 'hospital', timeOfDay: 'afternoon', weather }), 6);
+
+      expect(home.phrases.map((phrase) => phrase.text)).not.toEqual(hospital.phrases.map((phrase) => phrase.text));
+      expect(home.phrases[0]?.text).not.toBe(hospital.phrases[0]?.text);
+    });
   });
 
   describe('predictWithRules', () => {

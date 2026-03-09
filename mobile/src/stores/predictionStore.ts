@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Phrase, UserContext, LocationType, CustomPhrase, LocationDetectionResult, SupportedLanguage, WeatherData } from '../types';
-import { PredictionService, ContextService, StorageService, WeatherService } from '../services';
+import { PredictionService, ContextService, StorageService, WeatherService, LLMService } from '../services';
 import { useSettingsStore } from './settingsStore';
 
 let pendingLocationUpdate: ReturnType<typeof setTimeout> | null = null;
@@ -98,8 +98,9 @@ export const usePredictionStore = create<PredictionState>((set, get) => ({
       
       if (requestId !== currentPredictionRequest) return;
 
-      // Check if LLM enhancement is available for this language
-      const canUseLLM = LLM_SUPPORTED_LANGUAGES.includes(language) && PredictionService.isLLMAvailable();
+      const canUseLLM = PredictionService.isLLMAvailable() && (
+        !LLMService.isNativeMode || LLM_SUPPORTED_LANGUAGES.includes(language)
+      );
 
       set({
         predictions: ruleResult.phrases,
@@ -114,7 +115,6 @@ export const usePredictionStore = create<PredictionState>((set, get) => ({
         isEnhancing: canUseLLM,
       });
 
-      // Phase 2: LLM enhancement ONLY for English (SmolLM2 is English-trained)
       if (canUseLLM) {
         const llmResult = await PredictionService.enhanceWithLLM(context, 8);
         
@@ -178,6 +178,7 @@ export const usePredictionStore = create<PredictionState>((set, get) => ({
       });
 
       if (result.detected) {
+        ContextService.setLocationType(result.locationType);
         set({
           currentLocation: result.locationType,
           isLocationAutoDetected: true,
