@@ -5,6 +5,7 @@
 export { AppText } from './AppText';
 export { ErrorBoundary } from './ErrorBoundary';
 export { SkeletonLoader } from './SkeletonLoader';
+export { ScreenBackground } from './ScreenBackground';
 export { PhraseCard } from './PhraseCard';
 export { PhraseGrid } from './PhraseGrid';
 export { EmotionSelector } from './EmotionSelector';

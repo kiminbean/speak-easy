@@ -17,8 +17,8 @@ import {
   EmotionService,
 } from '../services';
 import { useSettingsStore, usePredictionStore } from '../stores';
-import { COLORS } from '../constants';
-import { ErrorBoundary } from '../components';
+import { COLORS, GLASS, SHADOWS } from '../constants';
+import { ErrorBoundary, ScreenBackground } from '../components';
 import { configureRTLRequiresRestart } from '../utils/rtl';
 import { getTranslations } from '../i18n';
 
@@ -71,7 +71,6 @@ export default function RootLayout() {
         setInitStatus('Loading phrases...');
         await loadPredictions();
 
-        if (__DEV__) console.log('App initialized successfully');
         setIsInitializing(false);
       } catch (error) {
         console.error('App initialization error:', error);
@@ -102,19 +101,23 @@ export default function RootLayout() {
   const T = getTranslations(settings.language);
 
   if (isInitializing) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingEmoji}>🗣️</Text>
-        <Text style={styles.loadingTitle}>SpeakEasy</Text>
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${llmProgress}%` }]} />
+      return (
+        <ScreenBackground>
+          <View style={styles.loadingContainer}>
+            <View style={styles.loadingShell}>
+              <Text style={styles.loadingEmoji}>🗣️</Text>
+              <Text style={styles.loadingTitle}>SpeakEasy</Text>
+              <View style={styles.progressContainer}>
+                <View style={styles.progressBar}>
+                  <View style={[styles.progressFill, { width: `${llmProgress}%` }]} />
+                </View>
+                <Text style={styles.progressText}>{llmProgress}%</Text>
+              </View>
+              <Text style={styles.loadingStatus}>{initStatus}</Text>
+            </View>
           </View>
-          <Text style={styles.progressText}>{llmProgress}%</Text>
-        </View>
-        <Text style={styles.loadingStatus}>{initStatus}</Text>
-      </View>
-    );
+        </ScreenBackground>
+      );
   }
 
   return (
@@ -125,15 +128,17 @@ export default function RootLayout() {
           <Stack
           screenOptions={{
             headerStyle: {
-              backgroundColor: COLORS.primary,
+              backgroundColor: COLORS.headerSurface,
             },
-            headerTintColor: '#fff',
+            headerTintColor: COLORS.text,
             headerTitleStyle: {
-              fontWeight: 'bold',
+              fontWeight: '700',
+              color: COLORS.text,
             },
             contentStyle: {
               backgroundColor: COLORS.background,
             },
+            headerShadowVisible: false,
           }}
         >
           <Stack.Screen
@@ -200,8 +205,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.background,
     padding: 40,
+  },
+  loadingShell: {
+    width: '100%',
+    maxWidth: 420,
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: 32,
+    borderWidth: 1,
+    borderColor: GLASS.border,
+    paddingHorizontal: 28,
+    paddingVertical: 32,
+    ...SHADOWS.lg,
   },
   loadingEmoji: {
     fontSize: 80,
@@ -221,15 +237,15 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     flex: 1,
-    height: 8,
-    backgroundColor: COLORS.border,
-    borderRadius: 4,
+    height: 10,
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 999,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
     backgroundColor: COLORS.primary,
-    borderRadius: 4,
+    borderRadius: 999,
   },
   progressText: {
     marginLeft: 12,
