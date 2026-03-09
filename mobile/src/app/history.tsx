@@ -8,9 +8,10 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScreenBackground } from '../components';
 import { useSettingsStore } from '../stores';
 import { StorageService, TTSService } from '../services';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants';
+import { COLORS, GLASS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants';
 import { getTranslations } from '../i18n';
 import * as Haptics from 'expo-haptics';
 
@@ -83,37 +84,41 @@ export default function HistoryScreen() {
   if (history.length === 0) {
     return (
       <SafeAreaView style={styles.container} edges={['bottom']}>
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>📜</Text>
-          <Text style={styles.emptyTitle}>{T.history.noHistory}</Text>
-          <Text style={styles.emptySubtitle}>
-            {T.history.noHistoryHint}
-          </Text>
-        </View>
+        <ScreenBackground>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyIcon}>📜</Text>
+            <Text style={styles.emptyTitle}>{T.history.noHistory}</Text>
+            <Text style={styles.emptySubtitle}>
+              {T.history.noHistoryHint}
+            </Text>
+          </View>
+        </ScreenBackground>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <Text style={styles.headerHint}>
-        {T.history.tapToSpeak}
-      </Text>
-      <FlatList
-        data={history}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => `${item.timestamp}_${index}`}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            colors={[COLORS.primary]}
-            tintColor={COLORS.primary}
-          />
-        }
-      />
+      <ScreenBackground>
+        <Text style={styles.headerHint}>
+          {T.history.tapToSpeak}
+        </Text>
+        <FlatList
+          data={history}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => `${item.timestamp}_${index}`}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              colors={[COLORS.primary]}
+              tintColor={COLORS.primary}
+            />
+          }
+        />
+      </ScreenBackground>
     </SafeAreaView>
   );
 }
@@ -140,6 +145,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
     flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: GLASS.border,
     ...SHADOWS.sm,
   },
   itemContent: {

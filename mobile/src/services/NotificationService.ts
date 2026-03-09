@@ -17,7 +17,6 @@ import { getTranslations } from '../i18n';
 // Configure notification handling
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
     shouldShowBanner: true,
