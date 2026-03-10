@@ -8,7 +8,6 @@ SpeakEasy Mobile is the React Native application inside this repository. It is t
 - Expo SDK: `54`
 - React Native: `0.81.5`
 - Active UI style: `v2-liquid-glass`
-- Legacy UI style retained in code: `v1-classic`
 - Bundle ID / package: `com.speakeasy.aac`
 
 ## Runtime Modes
@@ -108,7 +107,7 @@ mobile/
 - `src/services/LLMService.ts` - native/fallback AI behavior
 - `src/services/TTSService.ts` - TTS integration
 - `src/services/NotificationService.ts` - local notifications and caregiver flows
-- `src/constants/index.ts` - versioned theme tokens and active UI style selector
+- `src/constants/index.ts` - theme tokens and app version constants
 
 ## Validation
 
@@ -125,5 +124,4 @@ npx expo export --platform ios --output-dir dist-export
 ## Notes for Documentation and Release Work
 
 - Keep `app.json`, `package.json`, and `src/constants/index.ts` aligned on version changes.
-- If the active theme changes, update `README.md`, `mobile/README.md`, `AGENTS.md`, and any release docs that mention the UI style.
 - Do not describe fallback mode as native AI.

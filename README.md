@@ -88,13 +88,7 @@ The app is intentionally designed so communication features continue working eve
 
 ## Design System
 
-The app uses a versioned theme system in `mobile/src/constants/index.ts`.
-
-- Legacy theme: `v1-classic`
-- Current theme: `v2-liquid-glass`
-- Active selector: `ACTIVE_UI_STYLE_VERSION`
-
-This allows rollback to the older visual system without reworking every screen.
+The app uses the `v2-liquid-glass` design system, with all visual tokens defined in `mobile/src/constants/index.ts`.
 
 ## Key Source Files
 

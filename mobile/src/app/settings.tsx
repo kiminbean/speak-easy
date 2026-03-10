@@ -17,7 +17,7 @@ import { useRouter, Link } from 'expo-router';
 import { ScreenBackground } from '../components';
 import { useSettingsStore, usePredictionStore, useEmotionStore } from '../stores';
 import { TTSService, StorageService, ContextService, LLMService } from '../services';
-import { ACTIVE_UI_STYLE_VERSION, APP_VERSION, COLORS, GLASS, SHADOWS, SPACING, BORDER_RADIUS } from '../constants';
+import { UI_STYLE_VERSION, APP_VERSION, COLORS, GLASS, SHADOWS, SPACING, BORDER_RADIUS } from '../constants';
 import { getTranslations } from '../i18n';
 import { SupportedLanguage, SavedLocation, LocationType } from '../types';
 import { configureRTLRequiresRestart, isRTLLanguage, getWritingDirection } from '../utils/rtl';
@@ -474,7 +474,7 @@ export default function SettingsScreen() {
           <View style={styles.appInfo}>
             <Text style={styles.appName}>🗣️ {T.appName}</Text>
             <Text style={styles.appVersion}>{T.settings.version} {APP_VERSION}</Text>
-            <Text style={styles.appVersion}>{ACTIVE_UI_STYLE_VERSION}</Text>
+            <Text style={styles.appVersion}>{UI_STYLE_VERSION}</Text>
             <Text style={styles.appTagline}>
               {T.settings.tagline}
             </Text>

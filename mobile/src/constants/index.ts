@@ -6,14 +6,7 @@ export * from './phrases';
 export const APP_NAME = 'SpeakEasy';
 export const APP_VERSION = '1.1.0';
 
-export const UI_STYLE_VERSIONS = {
-  legacy: 'v1-classic',
-  liquidGlass: 'v2-liquid-glass',
-} as const;
-
-export type UIStyleVersion = typeof UI_STYLE_VERSIONS[keyof typeof UI_STYLE_VERSIONS];
-
-export const ACTIVE_UI_STYLE_VERSION: UIStyleVersion = UI_STYLE_VERSIONS.liquidGlass;
+export const UI_STYLE_VERSION = 'v2-liquid-glass' as const;
 
 type ColorTokens = {
   primary: string;
@@ -103,112 +96,6 @@ type ThemeTokens = {
     emergency: ShadowToken;
   };
   borderRadius: BorderRadiusTokens;
-};
-
-const LEGACY_THEME: ThemeTokens = {
-  colors: {
-    primary: '#2563EB',
-    primaryLight: '#3B82F6',
-    primaryDark: '#1D4ED8',
-    onPrimary: '#FFFFFF',
-    secondary: '#0D9488',
-    secondaryLight: '#14B8A6',
-    secondaryDark: '#0F766E',
-    onSecondary: '#FFFFFF',
-    accent: '#D97706',
-    accentLight: '#F59E0B',
-    accentDark: '#B45309',
-    onAccent: '#FFFFFF',
-    emergency: '#DC2626',
-    emergencyLight: '#EF4444',
-    emergencyDark: '#B91C1C',
-    emergencyBackground: '#FEF2F2',
-    onEmergency: '#FFFFFF',
-    success: '#059669',
-    successLight: '#10B981',
-    successDark: '#047857',
-    successBackground: '#ECFDF5',
-    onSuccess: '#FFFFFF',
-    warning: '#D97706',
-    warningLight: '#F59E0B',
-    warningBackground: '#FFFBEB',
-    onWarning: '#FFFFFF',
-    background: '#F8FAFC',
-    backgroundSecondary: '#F1F5F9',
-    surface: '#FFFFFF',
-    surfaceElevated: '#FFFFFF',
-    surfaceStrong: '#FFFFFF',
-    headerSurface: '#FFFFFF',
-    inputSurface: '#FFFFFF',
-    text: '#1E293B',
-    textSecondary: '#475569',
-    textTertiary: '#94A3B8',
-    textDisabled: '#CBD5E1',
-    border: '#E2E8F0',
-    borderLight: '#F1F5F9',
-    divider: '#E2E8F0',
-    ripple: 'rgba(37, 99, 235, 0.12)',
-    overlay: 'rgba(15, 23, 42, 0.5)',
-    disabled: '#94A3B8',
-    textLight: '#64748B',
-    primarySurface: 'rgba(37, 99, 235, 0.12)',
-  },
-  glass: {
-    border: 'rgba(255, 255, 255, 0.65)',
-    highlight: 'rgba(255, 255, 255, 0.8)',
-    tint: 'rgba(255, 255, 255, 0.2)',
-    overlay: 'rgba(255, 255, 255, 0.12)',
-    shadow: 'rgba(15, 23, 42, 0.18)',
-    orbA: 'rgba(59, 130, 246, 0.16)',
-    orbB: 'rgba(20, 184, 166, 0.14)',
-    orbC: 'rgba(245, 158, 11, 0.12)',
-  },
-  shadows: {
-    sm: {
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.05,
-      shadowRadius: 2,
-      elevation: 1,
-    },
-    md: {
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.08,
-      shadowRadius: 4,
-      elevation: 2,
-    },
-    lg: {
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-      elevation: 4,
-    },
-    xl: {
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.12,
-      shadowRadius: 16,
-      elevation: 8,
-    },
-    emergency: {
-      shadowColor: '#DC2626',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.25,
-      shadowRadius: 8,
-      elevation: 6,
-    },
-  },
-  borderRadius: {
-    xs: 4,
-    sm: 8,
-    md: 12,
-    lg: 16,
-    xl: 20,
-    xxl: 24,
-    full: 999,
-  },
 };
 
 const LIQUID_GLASS_THEME: ThemeTokens = {
@@ -317,16 +204,8 @@ const LIQUID_GLASS_THEME: ThemeTokens = {
   },
 };
 
-const THEMES: Record<UIStyleVersion, ThemeTokens> = {
-  [UI_STYLE_VERSIONS.legacy]: LEGACY_THEME,
-  [UI_STYLE_VERSIONS.liquidGlass]: LIQUID_GLASS_THEME,
-};
-
-const ACTIVE_THEME = THEMES[ACTIVE_UI_STYLE_VERSION];
-
-export const AVAILABLE_THEME_VERSIONS = THEMES;
-export const COLORS = ACTIVE_THEME.colors;
-export const GLASS = ACTIVE_THEME.glass;
+export const COLORS = LIQUID_GLASS_THEME.colors;
+export const GLASS = LIQUID_GLASS_THEME.glass;
 
 // Emotion Colors - Soft, calming palette
 export const EMOTION_COLORS = {
@@ -340,7 +219,7 @@ export const EMOTION_COLORS = {
 };
 
 // Shadows - Subtle depth
-export const SHADOWS = ACTIVE_THEME.shadows;
+export const SHADOWS = LIQUID_GLASS_THEME.shadows;
 
 // Layout - Generous spacing for accessibility
 export const SPACING = {
@@ -360,7 +239,7 @@ export const TOUCH_TARGET = {
   large: 64,
 };
 
-export const BORDER_RADIUS = ACTIVE_THEME.borderRadius;
+export const BORDER_RADIUS = LIQUID_GLASS_THEME.borderRadius;
 
 // Typography scale
 export const TYPOGRAPHY = {

@@ -9,7 +9,6 @@ SpeakEasy is a mobile AAC app for non-verbal users. The current app includes con
 Current release facts:
 - App version: `1.1.0`
 - Active UI style: `v2-liquid-glass`
-- Legacy UI style available for rollback: `v1-classic`
 - Native AI path: `react-native-executorch` when available in native/dev builds
 - Fallback AI path: rule-based predictions in Expo Go and unsupported environments
 
@@ -77,20 +76,14 @@ Important runtime files:
 - `mobile/src/services/LLMService.ts` - native vs fallback AI mode
 - `mobile/src/services/TTSService.ts` - speech output handling
 - `mobile/src/services/NotificationService.ts` - caregiver alerts and local notifications
-- `mobile/src/constants/index.ts` - versioned theme system and app version constants
+- `mobile/src/constants/index.ts` - theme tokens and app version constants
 
 ## UI and Theme Notes
 
-The app now uses a versioned theme system.
+The app uses the `v2-liquid-glass` design system exclusively.
 
-- `ACTIVE_UI_STYLE_VERSION` controls the active UI
-- `v2-liquid-glass` is the default visual system
-- `v1-classic` remains in code for rollback
+- All visual tokens are exported from `mobile/src/constants/index.ts`
 - Shared glass-style surfaces are built from constants plus `ScreenBackground`
-
-If you change the visual system, update both:
-- `mobile/src/constants/index.ts`
-- the docs that mention the active theme/version
 
 ## AI Runtime Notes
 

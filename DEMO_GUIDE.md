@@ -81,7 +81,7 @@ Good examples to call out:
 - The app is mobile-first and offline-first.
 - It stores user data on device.
 - Native AI is optional; fallback mode still gives context-aware suggestions.
-- The UI is versioned and currently uses `v2-liquid-glass`, with `v1-classic` retained for rollback in code.
+- The UI uses the `v2-liquid-glass` design system.
 
 ## Key Files to Reference if Needed
 

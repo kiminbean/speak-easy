@@ -9,15 +9,13 @@ SpeakEasy is currently maintained as an offline-first AAC mobile app under `mobi
 Current facts:
 - App version: `1.1.0`
 - Active UI style: `v2-liquid-glass`
-- Legacy style retained in code: `v1-classic`
 - Native AI path: supported native/dev builds when `react-native-executorch` is available
 - Fallback AI path: rule-based mode in Expo Go and unsupported environments
 
 ## Recent Project Changes Reflected in the Repo
 
 ### UI and design system
-- introduced a versioned theme system in `mobile/src/constants/index.ts`
-- activated `v2-liquid-glass`
+- `v2-liquid-glass` is the sole design system; all tokens in `mobile/src/constants/index.ts`
 - added shared glass background support with `mobile/src/components/ScreenBackground.tsx`
 - refreshed major screens and shared components to use the new visual language
 

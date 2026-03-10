@@ -17,8 +17,7 @@ The app combines:
 ## Current Product State
 
 - Version: `1.1.0`
-- Current design system: `v2-liquid-glass`
-- Legacy design retained in code: `v1-classic`
+- Design system: `v2-liquid-glass`
 - Package / bundle identifier: `com.speakeasy.aac`
 
 ## Why It Matters
