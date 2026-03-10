@@ -1,250 +1,127 @@
 # SpeakEasy Store Submission Guide
 
+This guide tracks the current mobile release packaging flow for SpeakEasy.
+
+## Current Release Metadata
+
+- Marketing version: `1.1.0`
+- iOS build number: `1.1.0`
+- Android version code: `21`
+- Bundle/package ID: `com.speakeasy.aac`
+- Active UI style: `v2-liquid-glass`
+
+Source of truth:
+- `mobile/app.json`
+- `mobile/package.json`
+- `mobile/src/constants/index.ts`
+
+## Build Profiles
+
+Defined in `mobile/eas.json`:
+
+- `development`
+  - internal distribution
+  - iOS simulator enabled
+  - Android debug APK
+- `preview`
+  - internal distribution
+  - device build for testing
+- `production`
+  - iOS App Store build settings
+  - Android AAB build settings
+  - auto increment enabled
+
 ## Pre-Submission Checklist
 
-### Assets Ready
-- [x] App Icon (1024x1024 PNG) - `assets/icon.png`
-- [x] Adaptive Icon for Android (1024x1024 PNG) - `assets/adaptive-icon.png`
-- [x] Splash Screen (200x200 PNG) - `assets/splash-icon.png`
-- [x] Feature Graphic for Play Store (1024x500 PNG) - `assets/feature-graphic.png`
-- [x] Privacy Policy - `PRIVACY_POLICY.md`
-- [x] Store Listings (EN/KO) - `store-assets/`
+### Metadata
+- [ ] `mobile/package.json` version matches release target
+- [ ] `mobile/app.json` version, build number, and version code are correct
+- [ ] privacy text and permissions are still accurate
+- [ ] `uiStyleVersion` in `mobile/app.json` matches the active theme in `mobile/src/constants/index.ts`
 
-### Screenshots Needed
-Create screenshots for each platform:
+### Quality checks
+- [ ] `cd mobile && npm run lint`
+- [ ] `cd mobile && npm test -- --runInBand`
+- [ ] `cd mobile && npx tsc --noEmit`
+- [ ] `cd mobile && npx expo export --platform ios --output-dir dist-export`
 
-**Phone Screenshots (Required)**
-- 6.5" display (iPhone 14 Pro Max): 1290 x 2796 px
-- 5.5" display (iPhone 8 Plus): 1242 x 2208 px
-- Android Phone: 1080 x 1920 px (minimum)
+### App review readiness
+- [ ] onboarding flow works from a clean install
+- [ ] suggested phrases change by location/time/weather in fallback mode
+- [ ] AI status labels correctly show `On-Device AI` vs `Rule-based Mode`
+- [ ] emergency alert flow works without crashing
+- [ ] TTS works on target release devices
 
-**Tablet Screenshots (Optional but Recommended)**
-- 12.9" iPad Pro: 2048 x 2732 px
-- Android Tablet: 1200 x 1920 px
+## Android Submission
 
----
-
-## Google Play Store Submission
-
-### Step 1: Setup Google Play Console
-
-1. Go to [Google Play Console](https://play.google.com/console)
-2. Create a new app (if not exists)
-   - App name: `SpeakEasy - AAC Communication`
-   - Default language: English (US)
-   - App type: App
-   - Category: Medical
-   - Free/Paid: Free
-
-### Step 2: Setup Service Account for EAS Submit
-
-1. In Google Cloud Console, create a Service Account
-2. Grant "Service Account User" role
-3. Create JSON key and save as `mobile/google-service-account.json`
-4. In Play Console: Setup > API Access > Link the service account
-5. Grant "Release manager" permission
-
-### Step 3: Store Listing
-
-Use content from `store-assets/store-listing-en.json`:
-
-**Short Description (80 chars max)**
-```
-AI-powered communication app for non-verbal individuals. 100% offline, 100% free.
-```
-
-**Full Description**
-See `store-assets/store-listing-en.json`
-
-**Graphics**
-- Feature Graphic: Upload `assets/feature-graphic.png`
-- Phone Screenshots: At least 2 screenshots
-- Icon: Automatically taken from app bundle
-
-### Step 4: Content Rating
-
-Answer the questionnaire. SpeakEasy should receive:
-- ESRB: Everyone
-- PEGI: 3
-
-### Step 5: App Content
-
-- Privacy Policy URL: `https://github.com/kiminbean/speak-easy/blob/main/PRIVACY_POLICY.md`
-- Ads: No ads
-- Data Safety:
-  - Data collected: None
-  - Data shared: None
-  - Security practices: Data encrypted in transit (N/A - no network)
-
-### Step 6: Build and Submit
+### Build
 
 ```bash
-# Build for production
 cd mobile
 eas build --platform android --profile production
+```
 
-# Submit to Play Store
+### Submit
+
+```bash
+cd mobile
 eas submit --platform android --profile production
 ```
 
----
+Current `submit.production.android` expects:
+- `google-service-account.json` at `mobile/google-service-account.json`
+- Play track: `internal`
+- Release status: `draft`
 
-## Apple App Store Submission
+## iOS Submission
 
-### Step 1: Setup App Store Connect
-
-1. Go to [App Store Connect](https://appstoreconnect.apple.com)
-2. Create a new app:
-   - Name: `SpeakEasy - AAC Communication`
-   - Primary Language: English (U.S.)
-   - Bundle ID: `com.speakeasy.aac`
-   - SKU: `com.speakeasy.aac`
-
-### Step 2: Update eas.json
-
-Edit `eas.json` with your Apple credentials:
-```json
-"ios": {
-  "appleId": "YOUR_APPLE_ID@email.com",
-  "ascAppId": "APP_STORE_CONNECT_APP_ID",
-  "appleTeamId": "YOUR_TEAM_ID"
-}
-```
-
-Find your `ascAppId`:
-- App Store Connect > Your App > General > App Information > Apple ID
-
-Find your `appleTeamId`:
-- developer.apple.com > Membership > Team ID
-
-### Step 3: App Store Listing
-
-**App Name**: SpeakEasy - AAC Communication
-
-**Subtitle (30 chars)**: AI Voice for Everyone
-
-**Keywords (100 chars)**:
-```
-AAC,communication,speech,non-verbal,autism,accessibility,text-to-speech,assistive
-```
-
-**Promotional Text (170 chars)**:
-```
-Free AI-powered communication app. 100% offline, zero data collection. Helping 70 million non-verbal people find their voice.
-```
-
-**Description**: Use content from `store-assets/store-listing-en.json`
-
-**What's New**: 
-```
-Initial release! SpeakEasy helps non-verbal individuals communicate with AI-powered phrase predictions. Works 100% offline.
-```
-
-### Step 4: App Privacy
-
-In App Store Connect > App Privacy:
-
-1. **Data Collection**: Select "No, we do not collect data"
-2. All data is stored locally on device
-3. No tracking, no analytics
-
-### Step 5: Age Rating
-
-Answer questionnaire for 4+ rating:
-- No mature content
-- No gambling
-- Medical/Treatment: Yes (AAC is medical assistive technology)
-
-### Step 6: Review Information
-
-**Contact Information**:
-- First Name: [Your name]
-- Last Name: [Your name]  
-- Phone: [Your phone]
-- Email: kiminbean@gmail.com
-
-**Notes for Review**:
-```
-SpeakEasy is an Augmentative and Alternative Communication (AAC) app designed to help non-verbal individuals communicate. 
-
-Key features to test:
-1. Tap any phrase card to hear it spoken aloud
-2. Select an emotion to get supportive phrases
-3. Use the Emergency button to trigger caregiver alerts
-4. Add custom phrases via the "+" button
-
-All data is stored locally. No account or internet required.
-```
-
-### Step 7: Build and Submit
+### Build
 
 ```bash
-# Build for production
 cd mobile
 eas build --platform ios --profile production
-
-# Submit to App Store
-eas submit --platform ios --profile production
 ```
 
----
-
-## Quick Commands Reference
+### Submit
 
 ```bash
-# Development build (Simulator)
-eas build --platform ios --profile development
-eas build --platform android --profile development
-
-# Preview build (Internal testing)
-eas build --platform all --profile preview
-
-# Production build
-eas build --platform all --profile production
-
-# Submit to stores
-eas submit --platform android --profile production
+cd mobile
 eas submit --platform ios --profile production
-
-# Check build status
-eas build:list
-
-# Run locally
-npx expo start
 ```
 
----
+Current `submit.production.ios` is configured in `mobile/eas.json` with App Store Connect values for the existing app.
+
+## Screenshots and Review Notes
+
+Use the current mobile UI when generating screenshots:
+- home screen with `v2-liquid-glass`
+- settings screen showing AI mode and language support
+- onboarding flow
+- emergency flow
+- custom phrase management
+
+Recommended reviewer notes:
+- SpeakEasy is an offline-first AAC app.
+- In Expo Go or unsupported environments, phrase prediction falls back to rule-based mode.
+- No cloud backend is required for core communication.
+- User data remains on device.
+
+## Release Notes Template
+
+```text
+SpeakEasy 1.1.0 refreshes the mobile UI with the new Liquid Glass design system, improves context-aware suggested phrases, clarifies AI runtime status, and keeps offline AAC workflows available on device.
+```
 
 ## Troubleshooting
 
-### Android Build Issues
+### Push notification warnings on simulator
 
-1. **Version Code Error**: Increment `versionCode` in app.json
-2. **Signing Issues**: Run `eas credentials` to configure
+Local notifications cannot be fully validated on the iOS simulator because `expo-device` reports `isDevice = false`. Use a physical device for end-to-end push validation.
 
-### iOS Build Issues
+### Native AI not available
 
-1. **Provisioning Profile**: EAS handles this automatically
-2. **Bundle ID Conflict**: Ensure bundle ID matches App Store Connect
+If the app shows `Rule-based Mode`, that is expected in Expo Go and any environment where `react-native-executorch` is unavailable.
 
-### Submission Rejected?
+### TTS voice selection differences
 
-Common reasons:
-- Missing privacy policy
-- Inadequate screenshot quality
-- Guideline violations (check rejection email)
-
----
-
-## Version History
-
-| Version | Build | Date | Changes |
-|---------|-------|------|---------|
-| 1.0.0 | 19 | 2026-01-12 | Initial release |
-
----
-
-## Support
-
-- GitHub Issues: https://github.com/kiminbean/speak-easy/issues
-- Email: kiminbean@gmail.com
+iOS simulator and physical devices may enumerate voices differently. Simulator-safe fallback behavior is expected; final speech-quality validation should happen on a real device.

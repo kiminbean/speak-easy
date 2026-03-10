@@ -41,7 +41,7 @@
     },
     "production": {
       "extends": "base",
-      "autoIncrement": "buildNumber",
+      "autoIncrement": true,
       "ios": {
         "resourceClass": "m-medium",
         "image": "latest"
@@ -51,7 +51,6 @@
         "resourceClass": "medium",
         "image": "latest"
       },
-      "channel": "production",
       "env": {
         "APP_ENV": "production"
       }
@@ -61,8 +60,8 @@
     "production": {
       "ios": {
         "appleId": "kiminbean@gmail.com",
-        "ascAppId": "YOUR_APP_STORE_CONNECT_APP_ID",
-        "appleTeamId": "YOUR_APPLE_TEAM_ID",
+        "ascAppId": "6757774576",
+        "appleTeamId": "4NJ9JSQFW9",
         "sku": "com.speakeasy.aac",
         "language": "en-US"
       },

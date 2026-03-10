@@ -1,179 +1,136 @@
 # AGENTS.md - SpeakEasy
 
-> AI-Powered AAC App | React Native + Expo SDK 54 | TypeScript | Zustand | Reanimated v4
+> Offline-first AAC mobile app | React Native 0.81 | Expo SDK 54 | TypeScript | Zustand | Reanimated 4
+
+## Project Summary
+
+SpeakEasy is a mobile AAC app for non-verbal users. The current app includes context-aware suggested phrases, custom phrases, favorites, phrase history, caregiver alerts, multilingual UI, and text-to-speech. The app is designed to work without a cloud backend.
+
+Current release facts:
+- App version: `1.1.0`
+- Active UI style: `v2-liquid-glass`
+- Legacy UI style available for rollback: `v1-classic`
+- Native AI path: `react-native-executorch` when available in native/dev builds
+- Fallback AI path: rule-based predictions in Expo Go and unsupported environments
 
 ## Commands
 
 ```bash
 cd mobile
-npm install && npm start          # Dev server (i=iOS, a=Android)
-npm run lint                      # ESLint check
-npm test                          # Run all tests
-npm test -- src/__tests__/rtl.test.ts     # Run single test file
-npm test -- -t "should detect RTL"        # Run tests matching pattern
-npm run prebuild:clean && npm run run:ios # Native build (required for LLM)
+npm install
+npm start
+npm run ios
+npm run android
+npm run lint
+npm test
+npm test -- --runInBand
+npm test -- src/__tests__/rtl.test.ts
+npx tsc --noEmit
+npm run prebuild:clean
+npm run run:ios
+npm run build:dev
+npm run build:ios
+npm run build:android
+npx expo export --platform ios --output-dir dist-export
 ```
 
 ## Golden Rules
 
-**Immutable**:
-- NO cloud dependencies - 100% offline operation
-- NO data leaves device - privacy first
-- NO type coercion (`as any`, `@ts-ignore`, `@ts-expect-error`)
-- WCAG 2.1 AA compliance - touch targets 48dp+, high contrast
+Immutable:
+- No cloud dependency is required for core communication.
+- No user data leaves the device.
+- Do not use `as any`, `@ts-ignore`, or `@ts-expect-error`.
+- Keep WCAG 2.1 AA accessibility goals in mind.
 
-**Do**:
-- Path alias `@/*` for `src/` imports
-- Singleton pattern for services
-- `react-native-reanimated` for all animations
-- `react-native-gesture-handler` for interactions
-- Constants from `@/constants` (COLORS, SPACING, ANIMATION)
-- Accessibility props on all interactive elements
-- Mock native modules in `jest.setup.js`
+Do:
+- Use `@/*` imports for `src/` paths where configured.
+- Keep services as singletons.
+- Use `react-native-reanimated` and `react-native-gesture-handler` for interactive motion.
+- Centralize design values in `mobile/src/constants/index.ts`.
+- Add accessibility roles/labels to interactive elements.
+- Keep UI strings in `mobile/src/i18n/index.ts` or phrase data in `mobile/src/i18n/phrases.ts`.
 
-**Don't**:
-- Import RN modules directly in services (breaks tests)
-- Inline styles - use `StyleSheet.create`
-- Hardcode text - use `@/i18n`
-- Skip haptic feedback on interactions
+Do not:
+- Hardcode new UI copy in screens or components.
+- Scatter visual tokens across screens when a shared constant should be used.
+- Break fallback behavior when native AI or simulator-only APIs are unavailable.
 
-## Code Patterns
+## Architecture
 
-### Imports Order
-```typescript
-// 1. React/RN
-import React, { useCallback, memo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-// 2. Reanimated & Gesture Handler
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-// 3. Expo
-import * as Haptics from 'expo-haptics';
-// 4. Internal (@/*)
-import { Phrase } from '@/types';
-import { COLORS, ANIMATION } from '@/constants';
-import { TTSService } from '@/services';
+```text
+mobile/src/
+├── app/          # Expo Router screens and flows
+├── components/   # Reusable UI pieces
+├── constants/    # Theme tokens, spacing, phrase metadata
+├── i18n/         # UI translations and phrase sources
+├── services/     # LLM, prediction, TTS, notifications, context, storage
+├── stores/       # Zustand app state
+├── types/        # Shared TypeScript models
+├── utils/        # Hashing, RTL helpers, small utilities
+└── __tests__/    # Jest test suites
 ```
 
-### Components (with Animations)
-```typescript
-export const PhraseCard = memo(function PhraseCard({ phrase, onPress }: Props) {
-  const scale = useSharedValue(1);
-  
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }]
-  }));
+Important runtime files:
+- `mobile/src/app/index.tsx` - primary phrase suggestion screen
+- `mobile/src/app/settings.tsx` - language, voice, AI mode, saved locations
+- `mobile/src/services/PredictionService.ts` - rule-based phrase generation
+- `mobile/src/services/LLMService.ts` - native vs fallback AI mode
+- `mobile/src/services/TTSService.ts` - speech output handling
+- `mobile/src/services/NotificationService.ts` - caregiver alerts and local notifications
+- `mobile/src/constants/index.ts` - versioned theme system and app version constants
 
-  const tap = Gesture.Tap()
-    .onBegin(() => { scale.value = withSpring(0.95, ANIMATION.spring); })
-    .onFinalize(() => { scale.value = withSpring(1, ANIMATION.spring); })
-    .onEnd(() => { runOnJS(onPress)(phrase); });
+## UI and Theme Notes
 
-  return (
-    <GestureDetector gesture={tap}>
-      <Animated.View style={[styles.card, animatedStyle]} accessibilityRole="button">
-        <Text>{phrase.text}</Text>
-      </Animated.View>
-    </GestureDetector>
-  );
-});
-```
+The app now uses a versioned theme system.
 
-### Services (Singleton)
-```typescript
-class TTSServiceClass {
-  private isInitialized = false;
-  
-  async speak(text: string): Promise<void> {
-    if (!this.isInitialized) await this.initialize();
-    // implementation
-  }
-}
-export const TTSService = new TTSServiceClass();
-```
+- `ACTIVE_UI_STYLE_VERSION` controls the active UI
+- `v2-liquid-glass` is the default visual system
+- `v1-classic` remains in code for rollback
+- Shared glass-style surfaces are built from constants plus `ScreenBackground`
 
-### Zustand Stores
-```typescript
-export const useStore = create<State>((set, get) => ({
-  data: DEFAULT,
-  isLoading: false,
-  loadData: async () => {
-    set({ isLoading: true });
-    const data = await StorageService.getData();
-    set({ data, isLoading: false });
-  },
-}));
-```
+If you change the visual system, update both:
+- `mobile/src/constants/index.ts`
+- the docs that mention the active theme/version
 
-### Naming Conventions
-- **Components**: `PascalCase` (PhraseCard, EmotionSelector)
-- **Functions/Variables**: `camelCase` (handlePress, isLoading)
-- **Constants**: `UPPER_SNAKE_CASE` (COLORS, ANIMATION)
-- **Types/Interfaces**: `PascalCase` (Phrase, EmotionType)
+## AI Runtime Notes
+
+There are two real runtime modes:
+
+1. Native AI mode
+- available only when the native executorch module loads successfully
+- shown in the UI as On-Device AI
+
+2. Rule-based fallback mode
+- used in Expo Go and unsupported environments
+- still uses context-aware prediction logic
+- shown in the UI as Rule-based Mode
+
+Do not describe fallback mode as native AI in docs or UI.
 
 ## Testing
 
-**Location**: `mobile/src/__tests__/*.test.ts`
+Primary test files live in `mobile/src/__tests__/`.
 
-```typescript
-import { StorageService } from '@/services';
+Useful checks:
 
-beforeEach(() => jest.clearAllMocks());
-
-describe('StorageService', () => {
-  it('should save and retrieve data', async () => {
-    await StorageService.save('key', { value: 1 });
-    const result = await StorageService.get('key');
-    expect(result).toEqual({ value: 1 });
-  });
-});
+```bash
+cd mobile
+npm test -- --runInBand
+npm test -- src/__tests__/prediction.test.ts --runInBand
+npm test -- src/__tests__/llm.test.ts --runInBand
+npm test -- src/__tests__/tts.test.ts --runInBand
+npx tsc --noEmit
+npm run lint
 ```
 
-**Mocks**: Native modules are mocked in `jest.setup.js` including:
-- `react-native-reanimated`
-- `react-native-gesture-handler`
-- `expo-speech`, `expo-haptics`, `expo-notifications`
+## Documentation Maintenance
 
-## Structure
+When features change, keep these files aligned:
+- `README.md`
+- `mobile/README.md`
+- `mobile/STORE_SUBMISSION_GUIDE.md`
+- `PRIVACY_POLICY.md`
+- `DEMO_GUIDE.md`
+- `SESSION_LOG.md`
 
-```
-mobile/src/
-├── app/          # Expo Router pages (index, settings, favorites)
-├── components/   # PhraseCard, PhraseGrid, EmotionSelector, EmergencyButton
-├── services/     # Prediction, Emotion, TTS, Storage, LLM, Context
-├── stores/       # Zustand: prediction, emotion, settings
-├── constants/    # COLORS, SPACING, ANIMATION, SHADOWS, phrases
-├── types/        # All TypeScript interfaces
-├── i18n/         # 20 languages, RTL support
-├── utils/        # hash, rtl helpers
-└── __tests__/    # Jest tests
-```
-
-## RTL Support
-
-```typescript
-import { isRTLLanguage, getWritingDirection } from '@/utils/rtl';
-const isRTL = isRTLLanguage(settings.language);
-// Apply: style={[styles.row, isRTL && styles.rowReverse]}
-```
-
-## Error Handling
-
-```typescript
-try {
-  return await service.method();
-} catch (error) {
-  console.error('[ServiceName] Failed:', error);
-  return fallbackValue;  // Always provide fallback, never crash
-}
-```
-
-## Adding Features
-
-1. Types → `src/types/index.ts`
-2. Service → `src/services/`
-3. Store → `src/stores/`
-4. Component → `src/components/` (with Reanimated animations)
-5. i18n → `src/i18n/phrases.ts` (all 20 languages)
-6. Tests → `src/__tests__/`
-7. Verify → `npm run lint && npm test`
+When in doubt, document the current observed behavior, not the intended future behavior.

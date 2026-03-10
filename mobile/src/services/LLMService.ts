@@ -33,12 +33,12 @@ let SMOLLM2_360M_QUANTIZED: string | null = null;
 
 try {
   const executorch = require('react-native-executorch');
-  if (__DEV__) console.log('[LLM] react-native-executorch loaded');
+  if (__DEV__) console.warn('[LLM] react-native-executorch loaded');
   LLMModuleClass = executorch.LLMModule;
   SMOLLM2_360M_QUANTIZED = executorch.SMOLLM2_1_360M_QUANTIZED;
-  if (__DEV__) console.log('[LLM] SmolLM2-360M-Quantized:', SMOLLM2_360M_QUANTIZED ? 'Found' : 'Not found');
+  if (__DEV__) console.warn('[LLM] SmolLM2-360M-Quantized:', SMOLLM2_360M_QUANTIZED ? 'Found' : 'Not found');
 } catch {
-  if (__DEV__) console.log('[LLM] react-native-executorch not available (Expo Go mode)');
+  if (__DEV__) console.warn('[LLM] react-native-executorch not available (Expo Go mode)');
 }
 
 export interface LLMConfig {
@@ -99,20 +99,20 @@ class LLMServiceClass {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.isInitialized = true;
 
-    if (__DEV__) console.log(`[LLM] Initializing: ${this.config.modelName}`);
+    if (__DEV__) console.warn(`[LLM] Initializing: ${this.config.modelName}`);
 
     if (LLMModuleClass && SMOLLM2_360M_QUANTIZED) {
       try {
-        if (__DEV__) console.log('[LLM] Loading SmolLM2-360M...');
+        if (__DEV__) console.warn('[LLM] Loading SmolLM2-360M...');
         await this.initializeNativeModule();
-        if (__DEV__) console.log('[LLM] SmolLM2-360M ready!');
+        if (__DEV__) console.warn('[LLM] SmolLM2-360M ready!');
         return;
       } catch (error) {
         if (__DEV__) console.warn('[LLM] Native init failed:', error);
       }
     }
 
-    if (__DEV__) console.log('[LLM] Using rule-based fallback');
+    if (__DEV__) console.warn('[LLM] Using rule-based fallback');
     await this.simulateModelDownload();
   }
 
@@ -133,7 +133,7 @@ class LLMServiceClass {
         this.downloadProgress = progress;
         this.onProgressCallback?.(progress);
         if (__DEV__ && progress % 25 === 0) {
-          console.log(`[LLM] Download: ${progress}%`);
+          console.warn(`[LLM] Download: ${progress}%`);
         }
       }
     );
@@ -159,7 +159,7 @@ class LLMServiceClass {
 
     this.isModelLoaded = true;
     this.onReadyCallback?.();
-    if (__DEV__) console.log('[LLM] Ready (rule-based mode)');
+    if (__DEV__) console.warn('[LLM] Ready (rule-based mode)');
   }
 
   onProgress(callback: (progress: number) => void): void {
@@ -189,7 +189,7 @@ class LLMServiceClass {
         
         response = await this.llmModule.generate(messages);
         
-        if (__DEV__) console.log('[LLM] Response:', response?.length || 0, 'chars');
+        if (__DEV__) console.warn('[LLM] Response:', response?.length || 0, 'chars');
       } catch (error) {
         if (__DEV__) console.warn('[LLM] Gen error:', error instanceof Error ? error.message : 'Unknown error');
         response = await this.generateSimulatedResponse(prompt);

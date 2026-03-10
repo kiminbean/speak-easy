@@ -1,206 +1,129 @@
-# 🗣️ SpeakEasy Mobile
+# SpeakEasy Mobile
 
-> AI-Powered AAC (Augmentative and Alternative Communication) App for Non-Verbal Individuals
+SpeakEasy Mobile is the React Native application inside this repository. It is the product source of truth for runtime behavior, release metadata, and UI implementation.
 
-## Overview
+## Current App State
 
-SpeakEasy is a **100% offline-capable** React Native app that helps non-verbal individuals communicate using AI-powered phrase predictions. Unlike traditional cloud-based AAC solutions, SpeakEasy runs entirely on-device, ensuring:
+- Version: `1.1.0`
+- Expo SDK: `54`
+- React Native: `0.81.5`
+- Active UI style: `v2-liquid-glass`
+- Legacy UI style retained in code: `v1-classic`
+- Bundle ID / package: `com.speakeasy.aac`
 
-- 🔒 **Privacy**: No data leaves the device
-- ⚡ **Speed**: Instant responses without network latency
-- 🌐 **Offline**: Works anywhere, anytime
-- 💰 **Free**: No subscription or cloud costs
+## Runtime Modes
 
-## Features
+### Native AI mode
 
-### Core Features
-- 🤖 **AI-Powered Predictions**: On-device sLLM (Qwen3-0.6B) predicts contextually relevant phrases
-- 📍 **Context Awareness**: Adapts to time of day and location
-- 😊 **Emotion Detection**: Recognizes emotional state through tap patterns and phrase sentiment
-- 🔊 **Text-to-Speech**: Native TTS for natural voice output
-- 🚨 **Emergency Alerts**: Quick emergency button with caregiver notifications
+Available only when the native `react-native-executorch` module loads in a native development build.
 
-### Accessibility
-- ♿ WCAG 2.1 AA Compliant
-- 📏 Adjustable text sizes
-- 🎯 High contrast mode
-- 📳 Haptic feedback
-- 🔤 Screen reader support
+- UI label: `On-Device AI`
+- Environment: `npm run ios`, `npm run android`, or EAS/native builds
+- Behavior: native model loading plus context-aware phrase generation
 
-## Tech Stack
+### Fallback mode
 
-| Layer | Technology |
-|-------|------------|
-| Framework | React Native + Expo |
-| AI/LLM | On-device sLLM (Qwen3-0.6B via react-native-executorch) |
-| TTS | expo-speech (native TTS engine) |
-| Storage | AsyncStorage |
-| State | Zustand |
-| Notifications | expo-notifications (local) |
+Used in Expo Go and unsupported environments.
 
-## Getting Started
+- UI label: `Rule-based Mode`
+- Environment: `npm start`
+- Behavior: context-aware phrase suggestions powered by local rules and fallback generation logic
 
-### Prerequisites
+## Core Features
 
-- Node.js 18+
-- Expo CLI (`npm install -g expo-cli`)
-- iOS Simulator (Mac) or Android Emulator
-- For actual LLM: Expo Development Build (not Expo Go)
+- Context-aware suggested phrases
+- Custom phrases and favorites
+- Phrase history
+- Saved locations and automatic location detection
+- Emotion-aware supportive phrases
+- Text-to-speech output
+- Local caregiver and emergency notifications
+- 20-language interface with RTL handling for Arabic and Urdu
+- Offline-first behavior with no cloud dependency for core communication
 
-### Installation
+## Main Commands
 
 ```bash
-# 1. Navigate to mobile directory
 cd mobile
-
-# 2. Install dependencies
 npm install
-
-# 3. Start development server
 npm start
-
-# 4. Run on simulator
-# Press 'i' for iOS or 'a' for Android
+npm run ios
+npm run android
+npm run lint
+npm test
+npm test -- --runInBand
+npx tsc --noEmit
+npm run prebuild:clean
+npm run build:dev
+npm run build:ios
+npm run build:android
+npx expo export --platform ios --output-dir dist-export
 ```
 
-### Development Build (for full LLM support)
+## Recommended Local Workflows
 
-> ⚠️ Expo Go does not support native LLM modules. Use a Development Build for full AI features.
+### Fast development loop
 
 ```bash
-# Option A: Local Build (requires Xcode/Android Studio)
-npm run prebuild:clean
-npm run run:ios     # iOS Simulator
-npm run run:android # Android Emulator
-
-# Option B: EAS Cloud Build (recommended)
-npm run build:dev
-
-# Then download and install the .apk/.app from EAS dashboard
+cd mobile
+npm start
 ```
 
-### Running Modes
+Use this when you want quick UI iteration in Expo Go with fallback AI behavior.
 
-| Command | LLM Mode | Use Case |
-|---------|----------|----------|
-| `npm start` | Fallback | Quick testing in Expo Go |
-| `npm run run:ios` | Native | Full features on iOS |
-| `npm run run:android` | Native | Full features on Android |
+### Native feature verification
+
+```bash
+cd mobile
+npm run ios
+```
+
+Use this when you need to verify native modules, native AI loading, or simulator/device-specific behavior.
 
 ## Project Structure
 
-```
+```text
 mobile/
-├── src/
-│   ├── app/              # Expo Router pages
-│   │   ├── _layout.tsx   # Root layout
-│   │   ├── index.tsx     # Main AAC screen
-│   │   └── settings.tsx  # Settings screen
-│   │
-│   ├── components/       # UI Components
-│   │   ├── PhraseCard.tsx
-│   │   ├── PhraseGrid.tsx
-│   │   ├── EmotionSelector.tsx
-│   │   └── EmergencyButton.tsx
-│   │
-│   ├── services/         # Business Logic
-│   │   ├── PredictionService.ts  # Phrase prediction
-│   │   ├── EmotionService.ts     # Emotion detection
-│   │   ├── TTSService.ts         # Text-to-speech
-│   │   ├── LLMService.ts         # On-device LLM
-│   │   ├── ContextService.ts     # Context management
-│   │   ├── StorageService.ts     # Local storage
-│   │   └── NotificationService.ts # Caregiver alerts
-│   │
-│   ├── stores/           # Zustand stores
-│   │   ├── predictionStore.ts
-│   │   ├── emotionStore.ts
-│   │   └── settingsStore.ts
-│   │
-│   ├── constants/        # App constants
-│   │   ├── emotions.ts   # Emotion definitions
-│   │   ├── phrases.ts    # Fallback phrases
-│   │   └── index.ts      # Colors, spacing
-│   │
-│   ├── types/            # TypeScript types
-│   │   └── index.ts
-│   │
-│   └── utils/            # Utilities
-│       └── hash.ts
-│
-├── assets/               # Images, icons
-├── app.json              # Expo config
+├── app.json
+├── eas.json
 ├── package.json
-└── tsconfig.json
+├── README.md
+└── src/
+    ├── app/          # Expo Router screens
+    ├── components/   # Reusable UI pieces
+    ├── constants/    # App version, theme tokens, phrase metadata
+    ├── i18n/         # UI translations and phrase sources
+    ├── services/     # Prediction, LLM, TTS, notifications, storage, context
+    ├── stores/       # Zustand stores
+    ├── types/        # Shared TypeScript types
+    └── utils/        # Hashing and RTL helpers
 ```
 
-## On-Device LLM Integration
+## Key Source Files
 
-The app uses **react-native-executorch** for on-device LLM inference with **Qwen3-0.6B-Quantized**.
+- `src/app/index.tsx` - main AAC experience
+- `src/app/settings.tsx` - language, voice, AI, and saved-location controls
+- `src/app/onboarding.tsx` - onboarding flow
+- `src/services/PredictionService.ts` - rule-based phrase engine
+- `src/services/LLMService.ts` - native/fallback AI behavior
+- `src/services/TTSService.ts` - TTS integration
+- `src/services/NotificationService.ts` - local notifications and caregiver flows
+- `src/constants/index.ts` - versioned theme tokens and active UI style selector
 
-### Two Modes
+## Validation
 
-| Mode | Environment | LLM | Quality |
-|------|-------------|-----|---------|
-| **Native** | Development Build | Qwen3-0.6B | High-quality AI predictions |
-| **Fallback** | Expo Go | Rule-based | Context-aware fallback |
-
-### Building with LLM Support
+Before finishing changes in `mobile/`, use the checks below whenever they are relevant:
 
 ```bash
-# Method 1: Local Build (requires Xcode/Android Studio)
-npm run prebuild:clean
-npm run run:ios   # or run:android
-
-# Method 2: EAS Cloud Build
-npm run build:dev
+cd mobile
+npm run lint
+npm test -- --runInBand
+npx tsc --noEmit
+npx expo export --platform ios --output-dir dist-export
 ```
 
-### Model Details
+## Notes for Documentation and Release Work
 
-- **Model**: Qwen3-0.6B-Quantized (~300MB)
-- **RAM**: ~1.2GB during inference
-- **Download**: Automatic on first launch
-- **Storage**: Cached locally after download
-
-See `src/services/LLMService.ts` for integration details.
-
-## Supported LLM Models
-
-| Model | Size | RAM Required | Best For |
-|-------|------|--------------|----------|
-| Qwen3-0.6B | ~500MB | 2GB | High quality predictions |
-| SmolLM2-135M | ~100MB | 1GB | Faster, lighter |
-| Llama 3.2 1B | ~1GB | 3GB | Most capable |
-
-## Offline Capabilities
-
-The app works 100% offline:
-
-- ✅ Rule-based phrase predictions (always available)
-- ✅ Native TTS (no internet required)
-- ✅ Local storage for settings and history
-- ✅ Local push notifications
-- ✅ Pre-downloaded LLM model
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing`)
-5. Open a Pull Request
-
-## License
-
-MIT License - See LICENSE for details
-
----
-
-<div align="center">
-
-### *"70 million people deserve a voice. SpeakEasy makes it possible."*
-
-Built with ❤️ for accessibility
-
-</div>
+- Keep `app.json`, `package.json`, and `src/constants/index.ts` aligned on version changes.
+- If the active theme changes, update `README.md`, `mobile/README.md`, `AGENTS.md`, and any release docs that mention the UI style.
+- Do not describe fallback mode as native AI.

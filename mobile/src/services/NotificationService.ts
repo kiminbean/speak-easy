@@ -51,7 +51,7 @@ class NotificationServiceClass {
       });
     }
 
-    if (__DEV__) console.log('NotificationService initialized');
+    if (__DEV__) console.warn('NotificationService initialized');
   }
 
   /**
@@ -59,7 +59,7 @@ class NotificationServiceClass {
    */
   async requestPermissions(): Promise<boolean> {
     if (!Device.isDevice) {
-      if (__DEV__) console.log('Notifications require a physical device');
+      if (__DEV__) console.warn('Notifications require a physical device');
       return false;
     }
 
@@ -73,7 +73,7 @@ class NotificationServiceClass {
       }
 
       if (finalStatus !== 'granted') {
-        if (__DEV__) console.log('Notification permissions not granted');
+        if (__DEV__) console.warn('Notification permissions not granted');
         return false;
       }
 
@@ -117,7 +117,7 @@ class NotificationServiceClass {
     });
 
     if (__DEV__) {
-      console.log('Emergency alert sent:', alert.id);
+      console.warn('Emergency alert sent:', alert.id);
     }
   }
 
@@ -152,7 +152,7 @@ class NotificationServiceClass {
   ): Promise<{ success: boolean; sentCount: number }> {
     const isAvailable = await SMS.isAvailableAsync();
     if (!isAvailable) {
-      if (__DEV__) console.log('SMS not available on this device');
+      if (__DEV__) console.warn('SMS not available on this device');
       return { success: false, sentCount: 0 };
     }
 
@@ -298,7 +298,7 @@ class NotificationServiceClass {
     const receivedSubscription = Notifications.addNotificationReceivedListener(
       (notification) => {
         if (__DEV__) {
-          console.log('Notification received:', notification.request.identifier);
+          console.warn('Notification received:', notification.request.identifier);
         }
         onNotificationReceived?.(notification);
       }
@@ -307,7 +307,7 @@ class NotificationServiceClass {
     const responseSubscription = Notifications.addNotificationResponseReceivedListener(
       (response) => {
         if (__DEV__) {
-          console.log('Notification response:', response.notification.request.identifier);
+          console.warn('Notification response:', response.notification.request.identifier);
         }
         onNotificationResponse?.(response);
       }

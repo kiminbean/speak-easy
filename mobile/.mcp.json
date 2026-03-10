@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "exa": {
+      "command": "bunx",
+      "args": [
+        "exa-mcp-server",
+        "tools=web_search_exa,get_code_context_exa,crawling_exa,company_research_exa,linkedin_search_exa,deep_researcher_start,deep_researcher_check"
+      ],
+      "env": {
+        "EXA_API_KEY": "cb2a3214-63d8-46a4-a9ae-402ed8448658"
+      }
+    }
+  }
+}

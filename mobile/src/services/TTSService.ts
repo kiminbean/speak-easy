@@ -47,7 +47,7 @@ class TTSServiceClass {
       }));
       
       this.selectBestVoices();
-      if (__DEV__) console.log(`TTS initialized with ${this.availableVoices.length} voices`);
+      if (__DEV__) console.warn(`TTS initialized with ${this.availableVoices.length} voices`);
     } catch (error) {
       if (__DEV__) console.error('TTS initialization error:', error);
     }
@@ -60,7 +60,7 @@ class TTSServiceClass {
       const bestVoice = this.findBestVoiceForLanguage(lang);
       if (bestVoice) {
         this.preferredVoices.set(lang, bestVoice.identifier);
-        if (__DEV__) console.log(`[TTS] Best ${lang} voice: ${bestVoice.name} (${bestVoice.quality})`);
+        if (__DEV__) console.warn(`[TTS] Best ${lang} voice: ${bestVoice.name} (${bestVoice.quality})`);
       }
     }
   }

@@ -1,70 +1,75 @@
 # Privacy Policy for SpeakEasy
 
-**Last Updated: January 5, 2026**
+Last updated: March 10, 2026
 
-## Introduction
+## Overview
 
-SpeakEasy ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how our mobile application SpeakEasy ("App") handles information.
+SpeakEasy is an offline-first AAC mobile application for non-verbal users. Privacy is a core product requirement. The app is designed so that core communication features work without a cloud backend and without requiring user accounts.
 
-## Information We Do NOT Collect
+## What We Collect
 
-SpeakEasy is designed with privacy as a core principle. **We do not collect, store, or transmit any personal data.**
+SpeakEasy does not require account creation and does not intentionally collect, sell, or share personal data with a cloud service for core app operation.
 
-- ❌ No account registration required
-- ❌ No personal information collected
-- ❌ No usage data sent to servers
-- ❌ No analytics or tracking
-- ❌ No advertising identifiers
-- ❌ No third-party data sharing
+The repository and app do not include analytics, advertising SDKs, or user-tracking services as part of the current mobile implementation.
 
-## Data Stored Locally on Your Device
+## What Is Stored on Device
 
-The App stores the following data **only on your device** (never transmitted):
+SpeakEasy stores user data locally on the device to support AAC workflows. Depending on feature usage, local data may include:
 
-| Data Type | Purpose | Storage |
-|-----------|---------|---------|
-| User preferences | App settings (language, voice speed) | Local device only |
-| Phrase history | Recently used phrases | Local device only |
-| Favorite phrases | Quick access to saved phrases | Local device only |
-| Caregiver contacts | Emergency notifications | Local device only |
+- app settings such as language, voice preferences, accessibility settings, and onboarding completion
+- favorites and custom phrases
+- phrase history and recent phrase context
+- saved locations used for context-aware suggestions
+- caregiver contact information for local emergency flows
+- cached context values used for prediction fallback behavior
 
-## Permissions
+This information is intended to remain on the device.
 
-The App may request the following permissions:
+## Permissions Used by the App
 
-- **Location**: To suggest context-appropriate phrases (e.g., hospital, school). Location data is processed locally and never transmitted.
-- **Microphone**: For potential future voice input features. Audio is processed locally only.
-- **Notifications**: To send local emergency alerts to caregivers.
+The app may request the following permissions:
 
-## Offline Operation
+- Location
+  - used to help determine context such as home, school, hospital, outdoor, or restaurant
+  - processed for local phrase suggestion behavior
+- Microphone
+  - reserved for current or future voice-input related features
+- Speech recognition
+  - reserved for current or future voice-input related features
+- Notifications
+  - used for local caregiver and emergency notification flows
 
-SpeakEasy is designed to work **100% offline**. The App does not require an internet connection and does not communicate with any external servers.
+These permission descriptions are defined in `mobile/app.json`.
 
-## Children's Privacy
+## Offline and AI Runtime Behavior
 
-SpeakEasy does not knowingly collect any personal information from children under 13 years of age. Since the App does not collect any data, it is safe for users of all ages.
+SpeakEasy is designed so that communication features remain available offline.
 
-## Data Security
+Current runtime behavior:
+- native AI mode is available only in supported native/dev builds when `react-native-executorch` loads successfully
+- rule-based fallback mode is used in Expo Go or unsupported environments
+- core AAC behavior does not depend on a cloud AI service
 
-All data remains on your device and is protected by your device's built-in security features. We recommend using device passcodes and biometric locks for additional security.
+## Data Sharing
+
+SpeakEasy does not intentionally share local AAC content with a remote backend for the current mobile implementation.
+
+However, users should understand that emergency and caregiver-related actions can involve device-level integrations such as notifications, SMS, or phone flows, depending on platform capabilities and user choices.
+
+## Children and Accessibility Use Cases
+
+SpeakEasy is intended to support accessibility scenarios, including use by children and assisted users. Since the app is designed around local-only storage and no account requirement, the privacy model is intentionally conservative.
+
+## Security
+
+SpeakEasy relies on the device's operating system protections for local data storage. Users should secure their devices with passcodes, biometrics, and standard OS protections when appropriate.
 
 ## Changes to This Policy
 
-We may update this Privacy Policy from time to time. Any changes will be reflected in the "Last Updated" date above.
+This policy may be updated when the app's runtime behavior, permissions, or storage behavior changes. The date at the top of this document reflects the latest repository update to this policy.
 
-## Contact Us
+## Contact
 
-If you have questions about this Privacy Policy, please contact us at:
-
-- **Email**: kiminbean@gmail.com
-- **GitHub**: https://github.com/kiminbean/speak-easy
-
-## Summary
-
-🔒 **SpeakEasy collects ZERO personal data.**
-📱 **All information stays on your device.**
-🌐 **The App works 100% offline.**
-
----
-
-*This privacy policy is effective as of January 5, 2026.*
+For questions about this policy or the project:
+- GitHub: https://github.com/kiminbean/speak-easy
+- Email: kiminbean@gmail.com
